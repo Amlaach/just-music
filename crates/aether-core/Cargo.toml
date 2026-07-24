@@ -1,0 +1,13 @@
+[package]
+name = "aether-core"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+thiserror.workspace = true
+serde.workspace = true
+uuid = { version = "1.8", features = ["v4", "serde"] }
+chrono = { version = "0.4.38", default-features = false, features = ["serde", "clock", "std"] }
+tracing.workspace = true
