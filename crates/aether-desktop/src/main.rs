@@ -8,7 +8,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .with_env_filter(EnvFilter::from_default_env().or_else(|_| EnvFilter::try_new("info")))
         .init();
 
-    tracing::info!("Starting Aether Sound System (Production Desktop Core)");
+    tracing::info!("Starting Just Music (Production Desktop Core)");
 
     // Initialize Headless Audio Engine
     let audio_handle = HeadlessAudioEngine::spawn()?;
@@ -24,6 +24,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     audio_handle.send_command(PlayerCommand::SetVolume(0.85))?;
     audio_handle.send_command(PlayerCommand::SetEqualizerEnabled(true))?;
 
-    tracing::info!("Aether Sound System initialization complete. Engine running cleanly.");
+    tracing::info!("Just Music initialization complete. Core engine running cleanly.");
     Ok(())
 }

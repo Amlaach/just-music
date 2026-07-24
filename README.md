@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎵 Aether Sound System (`just-music`)
+# 🎵 Just Music (`just-music`)
 
 **High-Performance Audio Engine & Desktop Music Player Core in Pure Rust**
 
@@ -15,8 +15,8 @@
 
 > [!WARNING]
 > ### 🚧 Project Status: Active Development (Work In Progress)
-> **`just-music` / Aether Sound System is currently under active pre-alpha development.**  
-> The core headless audio engine, SQLite database schema, instant search, file scanner/watcher, multi-tier cache, and BiDi layout engine are implemented in Pure Rust. The graphical UI renderer is actively being wired up.
+> **`just-music` is currently under active pre-alpha development.**  
+> The core headless audio engine, SQLite database schema, FTS5 instant search, file scanner/watcher, multi-tier cache, and BiDi layout engine are implemented in Pure Rust. The graphical UI renderer is actively being wired up.
 
 ---
 
@@ -36,7 +36,7 @@
 ## 📂 Workspace Structure
 
 ```
-aether-player/
+just-music/
 ├── LICENSE                        # MIT License
 ├── Cargo.toml                     # Workspace Configuration
 └── crates/
@@ -49,7 +49,7 @@ aether-player/
     ├── aether-plugin/             # Wasmtime WebAssembly Sandbox Engine
     ├── aether-monitor/            # Internal Diagnostic Metrics (CPU, RAM, Audio Buffer)
     ├── aether-ui/                 # Design System, BiDi RTL/LTR Engine & Virtual List
-    └── aether-desktop/            # Binary Entrypoint
+    └── aether-desktop/            # Binary Entrypoint (just-music)
 ```
 
 ---
