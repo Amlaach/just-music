@@ -16,7 +16,6 @@ aether-storage.workspace = true
 aether-library.workspace = true
 aether-cache.workspace = true
 aether-provider.workspace = true
-aether-plugin.workspace = true
 aether-monitor.workspace = true
 aether-ui.workspace = true
 tokio.workspace = true

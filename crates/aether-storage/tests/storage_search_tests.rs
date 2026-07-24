@@ -3,9 +3,9 @@ use aether_storage::{Database, InstantSearchEngine};
 use std::path::PathBuf;
 
 #[test]
-fn test_database_and_tantivy_instant_search() {
+fn test_database_and_fts5_instant_search() {
     let db = Database::in_memory().unwrap();
-    let search = InstantSearchEngine::new_in_memory().unwrap();
+    let search = InstantSearchEngine::new(db.clone()).unwrap();
 
     let track = Track {
         id: TrackId::new(),

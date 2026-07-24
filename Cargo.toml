@@ -16,8 +16,8 @@ members = [
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
-authors = ["Aether Sound System Team"]
-license = "MIT OR Apache-2.0"
+authors = ["Amlaach <https://github.com/Amlaach>"]
+license = "MIT"
 
 [workspace.dependencies]
 # Async & Concurrency
@@ -33,7 +33,6 @@ rubato = "0.15"
 
 # Database & Search
 rusqlite = { version = "0.31", features = ["bundled"] }
-tantivy = { version = "0.22", default-features = false, features = ["mmap", "lz4-compression", "tempfile"] }
 
 # Plugin Runtime
 wasmtime = { version = "21.0", default-features = false, features = ["async", "cranelift", "runtime", "std"] }
@@ -47,7 +46,6 @@ tracing = "0.1"
 tracing-subscriber = "0.3"
 uuid = { version = "1.8", features = ["v4", "serde"] }
 chrono = { version = "0.4.38", default-features = false, features = ["serde", "clock", "std"] }
-getrandom = "=0.2.15"
 
 # Internal workspace crates
 aether-core = { path = "crates/aether-core" }

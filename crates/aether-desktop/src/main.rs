@@ -18,13 +18,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     aether_storage::storage_init();
     aether_library::library_init();
     aether_cache::cache_init();
-    aether_plugin::plugin_engine_init();
     aether_ui::ui_init();
 
     // Verify engine responsiveness
     audio_handle.send_command(PlayerCommand::SetVolume(0.85))?;
     audio_handle.send_command(PlayerCommand::SetEqualizerEnabled(true))?;
 
-    tracing::info!("Aether Sound System initialization complete");
+    tracing::info!("Aether Sound System initialization complete. Engine running cleanly.");
     Ok(())
 }

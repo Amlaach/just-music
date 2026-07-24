@@ -32,6 +32,78 @@ impl Database {
         })
     }
 
+    pub fn execute_fts_init(&self) -> Result<()> {
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|_| AetherError::Storage("Mutex lock error".into()))?;
+
+        conn.execute_batch(
+            "CREATE VIRTUAL TABLE IF NOT EXISTS tracks_fts USING fts5(
+                id UNINDEXED,
+                title,
+                artist,
+                album,
+                genre,
+                tokenize = 'unicode61'
+            );",
+        )
+        .map_err(|e| AetherError::Storage(format!("FTS5 init error: {}", e)))?;
+
+        Ok(())
+    }
+
+    pub fn index_track_fts(&self, track: &Track) -> Result<()> {
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|_| AetherError::Storage("Mutex lock error".into()))?;
+
+        let genre_str = track.genre.as_deref().unwrap_or("");
+
+        conn.execute(
+            "INSERT OR REPLACE INTO tracks_fts (id, title, artist, album, genre) VALUES (?1, ?2, ?3, ?4, ?5)",
+            params![track.id.0, track.title, track.artist, track.album, genre_str],
+        )
+        .map_err(|e| AetherError::Storage(format!("FTS5 index error: {}", e)))?;
+
+        Ok(())
+    }
+
+    pub fn search_fts(&self, query_str: &str, limit: usize) -> Result<Vec<TrackId>> {
+        let clean_query = query_str.trim();
+        if clean_query.is_empty() {
+            return Ok(Vec::new());
+        }
+
+        let conn = self
+            .conn
+            .lock()
+            .map_err(|_| AetherError::Storage("Mutex lock error".into()))?;
+
+        let formatted_query = format!("{}*", clean_query);
+
+        let mut stmt = conn
+            .prepare("SELECT id FROM tracks_fts WHERE tracks_fts MATCH ?1 LIMIT ?2")
+            .map_err(|e| AetherError::Storage(format!("FTS5 prepare query error: {}", e)))?;
+
+        let rows = stmt
+            .query_map(params![formatted_query, limit as i64], |row| {
+                let id_str: String = row.get(0)?;
+                Ok(TrackId(id_str))
+            })
+            .map_err(|e| AetherError::Storage(format!("FTS5 search error: {}", e)))?;
+
+        let mut track_ids = Vec::new();
+        for r in rows {
+            if let Ok(id) = r {
+                track_ids.push(id);
+            }
+        }
+
+        Ok(track_ids)
+    }
+
     pub fn insert_or_update_track(&self, track: &Track) -> Result<()> {
         let conn = self
             .conn
