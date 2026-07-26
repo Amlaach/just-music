@@ -11,18 +11,12 @@ pub struct LibraryWatcher {
 }
 
 impl LibraryWatcher {
-    pub fn watch<P: AsRef<Path>>(
-        path: P,
-        scanner: LibraryScanner,
-    ) -> Result<Self> {
+    pub fn watch<P: AsRef<Path>>(path: P, scanner: LibraryScanner) -> Result<Self> {
         let watch_path = path.as_ref().to_path_buf();
         let (tx, rx) = channel();
 
-        let mut watcher = RecommendedWatcher::new(
-            tx,
-            Config::default(),
-        )
-        .map_err(|e| AetherError::Storage(format!("Watcher creation error: {}", e)))?;
+        let mut watcher = RecommendedWatcher::new(tx, Config::default())
+            .map_err(|e| AetherError::Storage(format!("Watcher creation error: {}", e)))?;
 
         watcher
             .watch(&watch_path, RecursiveMode::Recursive)
@@ -42,9 +36,19 @@ impl LibraryWatcher {
                                 if let Some(ext) = p.extension().and_then(|s| s.to_str()) {
                                     if matches!(
                                         ext.to_lowercase().as_str(),
-                                        "mp3" | "flac" | "wav" | "aac" | "m4a" | "ogg" | "opus" | "aiff"
+                                        "mp3"
+                                            | "flac"
+                                            | "wav"
+                                            | "aac"
+                                            | "m4a"
+                                            | "ogg"
+                                            | "opus"
+                                            | "aiff"
                                     ) {
-                                        tracing::info!("Real-time library change detected: {:?}", p);
+                                        tracing::info!(
+                                            "Real-time library change detected: {:?}",
+                                            p
+                                        );
                                         let _ = scanner.scan_directory(&path_clone);
                                         break;
                                     }

@@ -56,7 +56,9 @@ impl HeadlessAudioEngine {
                 };
                 engine.run_loop(is_running_clone);
             })
-            .map_err(|e| AetherError::AudioEngine(format!("Failed to spawn audio thread: {}", e)))?;
+            .map_err(|e| {
+                AetherError::AudioEngine(format!("Failed to spawn audio thread: {}", e))
+            })?;
 
         Ok(AudioEngineHandle {
             command_sender: cmd_tx,
@@ -79,7 +81,8 @@ impl HeadlessAudioEngine {
             }
         };
 
-        self.equalizer.set_sample_rate(output_device.sample_rate() as f32);
+        self.equalizer
+            .set_sample_rate(output_device.sample_rate() as f32);
 
         let mut active_decoder: Option<AudioDecoder> = None;
         let mut pcm_batch = Vec::with_capacity(4096);
@@ -130,29 +133,23 @@ impl HeadlessAudioEngine {
         }
     }
 
-    fn handle_command(
-        &mut self,
-        cmd: PlayerCommand,
-        active_decoder: &mut Option<AudioDecoder>,
-    ) {
+    fn handle_command(&mut self, cmd: PlayerCommand, active_decoder: &mut Option<AudioDecoder>) {
         match cmd {
-            PlayerCommand::LoadTrack(path) => {
-                match AudioDecoder::open(&path) {
-                    Ok(decoder) => {
-                        self.current_file = Some(path);
-                        *active_decoder = Some(decoder);
-                        self.state = PlayState::Playing;
-                        let _ = self
-                            .event_sender
-                            .send(PlayerEvent::StateChanged(PlayState::Playing));
-                    }
-                    Err(e) => {
-                        let _ = self
-                            .event_sender
-                            .send(PlayerEvent::ErrorOccurred(e.to_string()));
-                    }
+            PlayerCommand::LoadTrack(path) => match AudioDecoder::open(&path) {
+                Ok(decoder) => {
+                    self.current_file = Some(path);
+                    *active_decoder = Some(decoder);
+                    self.state = PlayState::Playing;
+                    let _ = self
+                        .event_sender
+                        .send(PlayerEvent::StateChanged(PlayState::Playing));
                 }
-            }
+                Err(e) => {
+                    let _ = self
+                        .event_sender
+                        .send(PlayerEvent::ErrorOccurred(e.to_string()));
+                }
+            },
             PlayerCommand::Play => {
                 if active_decoder.is_some() {
                     self.state = PlayState::Playing;
@@ -191,7 +188,10 @@ impl HeadlessAudioEngine {
                 self.volume.set_mute(muted);
                 let _ = self.event_sender.send(PlayerEvent::MuteChanged(muted));
             }
-            PlayerCommand::SetEqualizerBand { band_index, gain_db } => {
+            PlayerCommand::SetEqualizerBand {
+                band_index,
+                gain_db,
+            } => {
                 self.equalizer.set_band_gain(band_index, gain_db);
             }
             PlayerCommand::SetEqualizerEnabled(enabled) => {

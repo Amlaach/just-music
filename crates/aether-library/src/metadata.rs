@@ -10,13 +10,57 @@ pub struct MetadataExtractor;
 
 impl MetadataExtractor {
     pub fn extract<P: AsRef<Path>>(path: P) -> Result<Track> {
-        let path = path.as_ref();
-        let file = File::open(path)?;
+        let raw_path = path.as_ref();
+        let path_str = raw_path
+            .to_string_lossy()
+            .trim()
+            .trim_matches('"')
+            .trim_matches('\'')
+            .to_string();
+        let clean_path = std::path::PathBuf::from(&path_str);
+
+        if !clean_path.exists() {
+            return Err(AetherError::Io(std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                format!(
+                    "Audio file does not exist at path: '{}'",
+                    clean_path.display()
+                ),
+            )));
+        }
+
+        let file = File::open(&clean_path).map_err(|e| {
+            AetherError::Io(std::io::Error::new(
+                e.kind(),
+                format!("Failed to open file '{}': {}", clean_path.display(), e),
+            ))
+        })?;
+
         let mss = MediaSourceStream::new(Box::new(file), Default::default());
 
         let mut hint = Hint::new();
-        if let Some(ext) = path.extension().and_then(|s| s.to_str()) {
-            hint.with_extension(ext);
+        if let Some(ext) = clean_path.extension().and_then(|s| s.to_str()) {
+            let lower_ext = ext.to_lowercase();
+            hint.with_extension(&lower_ext);
+
+            match lower_ext.as_str() {
+                "mp3" => {
+                    hint.mime_type("audio/mp3");
+                }
+                "flac" => {
+                    hint.mime_type("audio/flac");
+                }
+                "wav" => {
+                    hint.mime_type("audio/wav");
+                }
+                "ogg" | "opus" => {
+                    hint.mime_type("audio/ogg");
+                }
+                "m4a" | "aac" | "mp4" => {
+                    hint.mime_type("audio/mp4");
+                }
+                _ => {}
+            }
         }
 
         let format_opts = FormatOptions::default();
@@ -24,7 +68,13 @@ impl MetadataExtractor {
 
         let mut probed = symphonia::default::get_probe()
             .format(&hint, mss, &format_opts, &metadata_opts)
-            .map_err(|e| AetherError::Decoder(format!("Probe failed: {}", e)))?;
+            .map_err(|e| {
+                AetherError::Decoder(format!(
+                    "Probe failed for '{}': {}",
+                    clean_path.display(),
+                    e
+                ))
+            })?;
 
         let track_info = probed
             .format
@@ -41,7 +91,11 @@ impl MetadataExtractor {
             .unwrap_or(0);
 
         let sample_rate = track_info.codec_params.sample_rate.unwrap_or(44100);
-        let channels = track_info.codec_params.channels.map(|c| c.count() as u16).unwrap_or(2);
+        let channels = track_info
+            .codec_params
+            .channels
+            .map(|c| c.count() as u16)
+            .unwrap_or(2);
         let bitrate = track_info.codec_params.bits_per_sample;
 
         let mut title = None;
@@ -76,20 +130,20 @@ impl MetadataExtractor {
             }
         }
 
-        let file_name = path
+        let file_name = clean_path
             .file_stem()
             .and_then(|s| s.to_str())
             .unwrap_or("Unknown Track")
             .to_string();
 
-        let ext = path
+        let ext = clean_path
             .extension()
             .and_then(|s| s.to_str())
             .unwrap_or("");
 
         Ok(Track {
             id: TrackId::new(),
-            file_path: path.to_path_buf(),
+            file_path: clean_path,
             title: title.unwrap_or(file_name),
             artist: artist.unwrap_or_else(|| "Unknown Artist".into()),
             album: album.unwrap_or_else(|| "Unknown Album".into()),

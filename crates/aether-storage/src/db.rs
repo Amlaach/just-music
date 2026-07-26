@@ -169,7 +169,10 @@ impl Database {
             .query(params![id.0])
             .map_err(|e| AetherError::Storage(e.to_string()))?;
 
-        if let Some(row) = rows.next().map_err(|e| AetherError::Storage(e.to_string()))? {
+        if let Some(row) = rows
+            .next()
+            .map_err(|e| AetherError::Storage(e.to_string()))?
+        {
             let path_str: String = row.get(1).unwrap_or_default();
             let format_str: String = row.get(12).unwrap_or_default();
 

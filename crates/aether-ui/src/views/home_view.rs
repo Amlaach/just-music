@@ -1,0 +1,158 @@
+use crate::state::AppState;
+use aether_audio::AudioEngineHandle;
+use aether_core::PlayerCommand;
+use egui::{Align, Color32, Layout, RichText, Sense, Vec2};
+use std::path::PathBuf;
+
+pub fn render_home_view(
+    ui: &mut egui::Ui,
+    state: &mut AppState,
+    audio_handle: Option<&AudioEngineHandle>,
+) {
+    let palette = state.design_system.palette.clone();
+
+    ui.add_space(20.0);
+
+    // Main Drag & Drop / File Upload Card
+    let card_height = 220.0;
+    let (rect, _response) =
+        ui.allocate_exact_size(Vec2::new(ui.available_width(), card_height), Sense::hover());
+
+    ui.painter().rect_filled(rect, 14.0, palette.cards);
+    ui.painter()
+        .rect_stroke(rect, 14.0, egui::Stroke::new(2.0_f32, palette.borders));
+
+    // Contents inside card
+    ui.allocate_ui_at_rect(rect, |ui| {
+        ui.with_layout(Layout::top_down(Align::Center), |ui| {
+            ui.add_space(35.0);
+
+            // Icon
+            ui.label(RichText::new("📁").size(42.0));
+            ui.add_space(10.0);
+
+            // Main Label
+            ui.label(
+                RichText::new("Drag Music Files Here")
+                    .size(18.0)
+                    .strong()
+                    .color(palette.text_primary),
+            );
+
+            ui.add_space(4.0);
+            ui.label(RichText::new("או").size(13.0).color(palette.text_secondary));
+            ui.add_space(10.0);
+
+            // Open File Button
+            let btn = egui::Button::new(
+                RichText::new("📂 Open File")
+                    .size(14.0)
+                    .strong()
+                    .color(Color32::WHITE),
+            )
+            .fill(palette.primary)
+            .rounding(10.0)
+            .min_size(Vec2::new(140.0, 36.0));
+
+            if ui.add(btn).clicked() {
+                if let Some(path) = rfd::FileDialog::new()
+                    .add_filter(
+                        "Audio Files",
+                        &[
+                            "mp3", "flac", "wav", "aac", "ogg", "opus", "m4a", "wma", "aiff",
+                        ],
+                    )
+                    .pick_file()
+                {
+                    load_file(path, state, audio_handle);
+                }
+            }
+        });
+    });
+
+    ui.add_space(25.0);
+
+    // Current Playing / Loaded Track Details or Empty State
+    if let Some(track) = &state.current_track {
+        ui.group(|ui| {
+            ui.set_width(ui.available_width());
+            ui.horizontal(|ui| {
+                ui.label(RichText::new("🎵").size(24.0));
+                ui.add_space(10.0);
+                ui.vertical(|ui| {
+                    ui.label(
+                        RichText::new(&track.title)
+                            .size(16.0)
+                            .strong()
+                            .color(palette.text_primary),
+                    );
+                    ui.label(
+                        RichText::new(&track.artist)
+                            .size(13.0)
+                            .color(palette.text_secondary),
+                    );
+                });
+            });
+        });
+    } else {
+        ui.vertical_centered(|ui| {
+            ui.add_space(30.0);
+            ui.label(
+                RichText::new("No music loaded yet")
+                    .size(16.0)
+                    .strong()
+                    .color(palette.text_secondary),
+            );
+            ui.label(
+                RichText::new("Drag files here or click Open File to start listening")
+                    .size(13.0)
+                    .color(palette.text_secondary),
+            );
+        });
+    }
+}
+
+pub fn load_file(path: PathBuf, state: &mut AppState, audio_handle: Option<&AudioEngineHandle>) {
+    let ext_str = path
+        .extension()
+        .and_then(|s| s.to_str())
+        .unwrap_or("")
+        .to_lowercase();
+    let format = aether_core::AudioFormat::from_extension(&ext_str);
+    let title = path
+        .file_stem()
+        .map(|s| s.to_string_lossy().to_string())
+        .unwrap_or_else(|| "Audio File".into());
+    let track = aether_core::Track {
+        id: aether_core::TrackId::new(),
+        file_path: path.clone(),
+        title,
+        artist: "Local Audio File".into(),
+        album: "Just Music".into(),
+        genre: None,
+        year: None,
+        track_number: None,
+        duration_ms: 0,
+        bitrate: Some(320),
+        sample_rate: 44100,
+        channels: 2,
+        format,
+        replaygain_track_gain: None,
+        replaygain_track_peak: None,
+        play_count: 0,
+        rating: 0,
+    };
+
+    state.current_track = Some(track.clone());
+    if !state.playlist.iter().any(|t| t.file_path == path) {
+        state.playlist.push(track.clone());
+    }
+    if !state.recent_tracks.iter().any(|t| t.file_path == path) {
+        state.recent_tracks.insert(0, track);
+    }
+
+    if let Some(handle) = audio_handle {
+        let _ = handle.send_command(PlayerCommand::LoadTrack(path));
+    }
+    state.toast_manager.notify("File Loaded Successfully");
+}

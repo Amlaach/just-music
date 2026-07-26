@@ -1,0 +1,10 @@
+[package]
+name = "getrandom"
+version = "0.4.3"
+edition = "2021"
+
+[features]
+default = ["std"]
+std = []
+
+[dependencies]

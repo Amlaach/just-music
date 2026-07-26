@@ -12,9 +12,9 @@ pub struct AudioOutputDevice {
 impl AudioOutputDevice {
     pub fn new(mut consumer: Consumer<f32>) -> Result<Self> {
         let host = cpal::default_host();
-        let device = host
-            .default_output_device()
-            .ok_or_else(|| AetherError::AudioEngine("No default audio output device found".into()))?;
+        let device = host.default_output_device().ok_or_else(|| {
+            AetherError::AudioEngine("No default audio output device found".into())
+        })?;
 
         let config: StreamConfig = device
             .default_output_config()
@@ -39,7 +39,9 @@ impl AudioOutputDevice {
                 err_fn,
                 None,
             )
-            .map_err(|e| AetherError::AudioEngine(format!("Failed to build audio stream: {}", e)))?;
+            .map_err(|e| {
+                AetherError::AudioEngine(format!("Failed to build audio stream: {}", e))
+            })?;
 
         stream
             .play()

@@ -30,9 +30,18 @@ pub enum PlayerCommand {
     EnqueueTrack(TrackId),
     RemoveFromQueue(usize),
     ClearQueue,
-    SetEqualizerBand { band_index: usize, gain_db: f32 },
+    SetEqualizerBand {
+        band_index: usize,
+        gain_db: f32,
+    },
     SetEqualizerEnabled(bool),
     SetReplayGainMode(ReplayGainMode),
-    UpdateTrackMetadata { track_id: TrackId, metadata: MetadataUpdate },
-    SetRating { track_id: TrackId, rating: u8 },
+    UpdateTrackMetadata {
+        track_id: TrackId,
+        metadata: MetadataUpdate,
+    },
+    SetRating {
+        track_id: TrackId,
+        rating: u8,
+    },
 }

@@ -1,6 +1,6 @@
 use aether_core::{AetherError, Result};
 use std::fs::File;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use symphonia::core::audio::{AudioBufferRef, Signal};
 use symphonia::core::codecs::{Decoder, DecoderOptions};
@@ -19,27 +19,87 @@ pub struct AudioDecoder {
 
 impl AudioDecoder {
     pub fn open<P: AsRef<Path>>(path: P) -> Result<Self> {
-        let file = File::open(path.as_ref())?;
+        let raw_path = path.as_ref();
+        let path_str = raw_path
+            .to_string_lossy()
+            .trim()
+            .trim_matches('"')
+            .trim_matches('\'')
+            .to_string();
+        let clean_path = PathBuf::from(&path_str);
+
+        if !clean_path.exists() {
+            return Err(AetherError::Io(std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                format!(
+                    "Audio file does not exist at path: '{}'",
+                    clean_path.display()
+                ),
+            )));
+        }
+
+        let file = File::open(&clean_path).map_err(|e| {
+            AetherError::Io(std::io::Error::new(
+                e.kind(),
+                format!("Failed to open file '{}': {}", clean_path.display(), e),
+            ))
+        })?;
+
         let mss = MediaSourceStream::new(Box::new(file), Default::default());
 
         let mut hint = Hint::new();
-        if let Some(ext) = path.as_ref().extension().and_then(|s| s.to_str()) {
-            hint.with_extension(ext);
+        if let Some(ext) = clean_path.extension().and_then(|s| s.to_str()) {
+            let lower_ext = ext.to_lowercase();
+            hint.with_extension(&lower_ext);
+
+            match lower_ext.as_str() {
+                "mp3" => {
+                    hint.mime_type("audio/mp3");
+                }
+                "flac" => {
+                    hint.mime_type("audio/flac");
+                }
+                "wav" => {
+                    hint.mime_type("audio/wav");
+                }
+                "ogg" | "opus" => {
+                    hint.mime_type("audio/ogg");
+                }
+                "m4a" | "aac" | "mp4" => {
+                    hint.mime_type("audio/mp4");
+                }
+                "aiff" | "aif" => {
+                    hint.mime_type("audio/aiff");
+                }
+                _ => {}
+            }
         }
 
-        let format_opts = FormatOptions::default();
+        let format_opts = FormatOptions {
+            enable_gapless: true,
+            ..Default::default()
+        };
         let metadata_opts = MetadataOptions::default();
         let decoder_opts = DecoderOptions::default();
 
         let probed = symphonia::default::get_probe()
             .format(&hint, mss, &format_opts, &metadata_opts)
-            .map_err(|e| AetherError::Decoder(format!("Probe error: {}", e)))?;
+            .map_err(|e| {
+                AetherError::Decoder(format!(
+                    "Failed to probe audio format for '{}': {}",
+                    clean_path.display(),
+                    e
+                ))
+            })?;
 
         let format_reader = probed.format;
 
-        let track = format_reader
-            .default_track()
-            .ok_or_else(|| AetherError::Decoder("No default audio track found".into()))?;
+        let track = format_reader.default_track().ok_or_else(|| {
+            AetherError::Decoder(format!(
+                "No audio track found in '{}'",
+                clean_path.display()
+            ))
+        })?;
 
         let track_id = track.id;
         let sample_rate = track.codec_params.sample_rate.unwrap_or(44100);
@@ -47,7 +107,13 @@ impl AudioDecoder {
 
         let decoder = symphonia::default::get_codecs()
             .make(&track.codec_params, &decoder_opts)
-            .map_err(|e| AetherError::Decoder(format!("Codec creation error: {}", e)))?;
+            .map_err(|e| {
+                AetherError::Decoder(format!(
+                    "Failed to create codec decoder for '{}': {}",
+                    clean_path.display(),
+                    e
+                ))
+            })?;
 
         Ok(Self {
             format_reader,
@@ -104,69 +170,127 @@ impl AudioDecoder {
             AudioBufferRef::F32(buf) => {
                 let num_channels = buf.spec().channels.count();
                 let num_frames = buf.frames();
-                output.reserve(num_frames * num_channels);
+                output.reserve(num_frames * if num_channels == 1 { 2 } else { num_channels });
                 for frame in 0..num_frames {
-                    for ch in 0..num_channels {
-                        output.push(buf.chan(ch)[frame]);
+                    if num_channels == 1 {
+                        let sample = buf.chan(0)[frame];
+                        output.push(sample);
+                        output.push(sample);
+                    } else {
+                        for ch in 0..num_channels {
+                            output.push(buf.chan(ch)[frame]);
+                        }
                     }
                 }
             }
             AudioBufferRef::U8(buf) => {
                 let num_channels = buf.spec().channels.count();
                 let num_frames = buf.frames();
-                output.reserve(num_frames * num_channels);
+                output.reserve(num_frames * if num_channels == 1 { 2 } else { num_channels });
                 for frame in 0..num_frames {
-                    for ch in 0..num_channels {
-                        let sample = (buf.chan(ch)[frame] as f32 - 128.0) / 128.0;
+                    if num_channels == 1 {
+                        let sample = (buf.chan(0)[frame] as f32 - 128.0) / 128.0;
                         output.push(sample);
+                        output.push(sample);
+                    } else {
+                        for ch in 0..num_channels {
+                            let sample = (buf.chan(ch)[frame] as f32 - 128.0) / 128.0;
+                            output.push(sample);
+                        }
                     }
                 }
             }
             AudioBufferRef::U16(buf) => {
                 let num_channels = buf.spec().channels.count();
                 let num_frames = buf.frames();
-                output.reserve(num_frames * num_channels);
+                output.reserve(num_frames * if num_channels == 1 { 2 } else { num_channels });
                 for frame in 0..num_frames {
-                    for ch in 0..num_channels {
-                        let sample = (buf.chan(ch)[frame] as f32 - 32768.0) / 32768.0;
+                    if num_channels == 1 {
+                        let sample = (buf.chan(0)[frame] as f32 - 32768.0) / 32768.0;
                         output.push(sample);
+                        output.push(sample);
+                    } else {
+                        for ch in 0..num_channels {
+                            let sample = (buf.chan(ch)[frame] as f32 - 32768.0) / 32768.0;
+                            output.push(sample);
+                        }
                     }
                 }
             }
             AudioBufferRef::S16(buf) => {
                 let num_channels = buf.spec().channels.count();
                 let num_frames = buf.frames();
-                output.reserve(num_frames * num_channels);
+                output.reserve(num_frames * if num_channels == 1 { 2 } else { num_channels });
                 for frame in 0..num_frames {
-                    for ch in 0..num_channels {
-                        let sample = buf.chan(ch)[frame] as f32 / 32768.0;
+                    if num_channels == 1 {
+                        let sample = buf.chan(0)[frame] as f32 / 32768.0;
                         output.push(sample);
+                        output.push(sample);
+                    } else {
+                        for ch in 0..num_channels {
+                            let sample = buf.chan(ch)[frame] as f32 / 32768.0;
+                            output.push(sample);
+                        }
                     }
                 }
             }
             AudioBufferRef::S24(buf) => {
                 let num_channels = buf.spec().channels.count();
                 let num_frames = buf.frames();
-                output.reserve(num_frames * num_channels);
+                output.reserve(num_frames * if num_channels == 1 { 2 } else { num_channels });
                 for frame in 0..num_frames {
-                    for ch in 0..num_channels {
-                        let sample = buf.chan(ch)[frame].0 as f32 / 8388608.0;
+                    if num_channels == 1 {
+                        let sample = buf.chan(0)[frame].0 as f32 / 8388608.0;
                         output.push(sample);
+                        output.push(sample);
+                    } else {
+                        for ch in 0..num_channels {
+                            let sample = buf.chan(ch)[frame].0 as f32 / 8388608.0;
+                            output.push(sample);
+                        }
                     }
                 }
             }
             AudioBufferRef::S32(buf) => {
                 let num_channels = buf.spec().channels.count();
                 let num_frames = buf.frames();
-                output.reserve(num_frames * num_channels);
+                output.reserve(num_frames * if num_channels == 1 { 2 } else { num_channels });
                 for frame in 0..num_frames {
-                    for ch in 0..num_channels {
-                        let sample = buf.chan(ch)[frame] as f32 / 2147483648.0;
+                    if num_channels == 1 {
+                        let sample = buf.chan(0)[frame] as f32 / 2147483648.0;
                         output.push(sample);
+                        output.push(sample);
+                    } else {
+                        for ch in 0..num_channels {
+                            let sample = buf.chan(ch)[frame] as f32 / 2147483648.0;
+                            output.push(sample);
+                        }
                     }
                 }
             }
             _ => {}
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_decoder_open_non_existent_file_returns_error() {
+        let err = AudioDecoder::open("non_existent_audio_file_12345.mp3");
+        assert!(err.is_err());
+        let err_msg = err.err().unwrap().to_string();
+        assert!(err_msg.contains("Audio file does not exist"));
+    }
+
+    #[test]
+    fn test_decoder_open_quoted_path_cleaning() {
+        let err = AudioDecoder::open("\"non_existent_file_quoted.wav\"");
+        assert!(err.is_err());
+        let err_msg = err.err().unwrap().to_string();
+        assert!(err_msg.contains("non_existent_file_quoted.wav"));
+        assert!(!err_msg.contains("\"non_existent_file_quoted.wav\""));
     }
 }

@@ -23,6 +23,6 @@ fn test_virtual_list_calculator() {
     let calc = VirtualListCalculator::new(50.0, 2);
     let win = calc.calculate(100000, 1000.0, 500.0);
     assert_eq!(win.start_index, 18); // 20 - 2 overdraw
-    assert_eq!(win.end_index, 32);   // 20 + 10 visible + 2 overdraw
+    assert_eq!(win.end_index, 32); // 20 + 10 visible + 2 overdraw
     assert_eq!(win.top_padding_px, 900.0);
 }
