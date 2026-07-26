@@ -12,13 +12,17 @@ pub struct JustMusicApp {
 
 impl JustMusicApp {
     pub fn new(cc: &eframe::CreationContext<'_>, audio_handle: Option<AudioEngineHandle>) -> Self {
-        let state = AppState::default();
+        let mut state = AppState::default();
+        // Default to dark theme for a premium music player aesthetic
+        state.settings.theme_mode = crate::theme::ThemeMode::Dark;
+        state.design_system = crate::theme::DesignSystem::new(crate::theme::ThemeMode::Dark);
 
         let palette = state.design_system.palette.clone();
-        let mut visuals = egui::Visuals::light();
+        let mut visuals = egui::Visuals::dark();
         visuals.window_fill = palette.background;
         visuals.panel_fill = palette.background;
         visuals.override_text_color = Some(palette.text_primary);
+        visuals.window_rounding = egui::Rounding::same(12.0);
         cc.egui_ctx.set_visuals(visuals);
 
         Self {

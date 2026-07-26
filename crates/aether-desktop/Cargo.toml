@@ -17,7 +17,11 @@ aether-monitor.workspace = true
 aether-ui.workspace = true
 eframe.workspace = true
 egui.workspace = true
-image = { version = "0.25", default-features = false, features = ["ico", "png"] }
 tokio = { version = "1.38", features = ["rt-multi-thread", "macros"] }
 tracing.workspace = true
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+chrono = { version = "0.4.38", default-features = false, features = ["clock", "std"] }
+dirs-next = "2.0"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = ["Win32_UI_WindowsAndMessaging"] }

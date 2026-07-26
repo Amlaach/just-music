@@ -116,6 +116,14 @@ pub fn render_settings_view(ui: &mut egui::Ui, state: &mut AppState) {
 
             if state.design_system.mode != state.settings.theme_mode {
                 state.design_system = crate::theme::DesignSystem::new(state.settings.theme_mode);
+                let palette = state.design_system.palette.clone();
+                let is_dark = matches!(state.settings.theme_mode, ThemeMode::Dark | ThemeMode::System);
+                let mut visuals = if is_dark { egui::Visuals::dark() } else { egui::Visuals::light() };
+                visuals.window_fill = palette.background;
+                visuals.panel_fill = palette.background;
+                visuals.override_text_color = Some(palette.text_primary);
+                visuals.window_rounding = egui::Rounding::same(12.0);
+                ui.ctx().set_visuals(visuals);
             }
 
             ui.add_space(15.0);

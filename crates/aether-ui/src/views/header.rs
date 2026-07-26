@@ -4,6 +4,19 @@ use egui::{Align, Align2, Color32, Layout, RichText, Sense, Vec2, ViewportComman
 pub fn render_header(ui: &mut egui::Ui, state: &mut AppState) {
     let palette = state.design_system.palette.clone();
 
+    // Make the entire header panel a drag area for the frameless window
+    let title_bar_rect = ui.max_rect();
+    let title_bar_response = ui.interact(title_bar_rect, ui.id().with("title_bar"), Sense::click());
+    if title_bar_response.is_pointer_button_down_on() {
+        ui.ctx().send_viewport_cmd(ViewportCommand::StartDrag);
+    }
+    // Double-click to maximize/restore
+    if title_bar_response.double_clicked() {
+        let is_maximized = ui.input(|i| i.viewport().maximized.unwrap_or(false));
+        ui.ctx()
+            .send_viewport_cmd(ViewportCommand::Maximized(!is_maximized));
+    }
+
     ui.horizontal(|ui| {
         ui.spacing_mut().item_spacing = Vec2::new(10.0, 0.0);
 

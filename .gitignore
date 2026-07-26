@@ -1,6 +1,21 @@
+# Rust build artifacts
 **/target
 **/*.rs.bk
-*.log
+
+# IDE
 .idea/
 .vscode/
+*.swp
+*.swo
+*~
+
+# OS
 .DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+
+# Build tools
+bin/

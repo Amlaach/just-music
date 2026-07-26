@@ -41,7 +41,7 @@ pub fn render_about_view(ui: &mut egui::Ui, state: &mut AppState) {
             ui.vertical(|ui| {
                 ui.horizontal(|ui| {
                     ui.label(RichText::new("Version:").strong());
-                    ui.label("v1.0.0 (Commercial Production)");
+                    ui.label("v1.0.0");
                 });
                 ui.add_space(6.0);
                 ui.horizontal(|ui| {

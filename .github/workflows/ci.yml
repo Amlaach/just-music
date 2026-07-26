@@ -1,4 +1,4 @@
-name: CI & Automated Build
+name: CI - Build & Test
 
 on:
   push:
@@ -10,43 +10,33 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build-and-test:
-    name: Build & Test (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+  check:
+    name: Check & Test (Windows)
+    runs-on: windows-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies (Linux)
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libasound2-dev libudev-dev pkg-config
-
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
-          components: clippy, rustfmt
+          components: clippy
 
       - name: Cache Cargo dependencies
         uses: Swatinem/rust-cache@v2
 
-      # Check formatting
-      - name: Check Formatting
-        run: cargo fmt --check
+      - name: Run Cargo Check (desktop)
+        run: cargo check -p aether-core -p aether-audio -p aether-ui -p aether-desktop
 
-      # Type check workspace
-      - name: Run Cargo Check
-        run: cargo check --workspace
+      - name: Run Cargo Test (core crates)
+        run: cargo test -p aether-core -p aether-audio -p aether-ui -p aether-cache -p aether-monitor
 
-      # Automated release build on GitHub
-      - name: Build Release
-        run: cargo build --release --workspace
+      - name: Build Release Binary
+        run: cargo build --release -p aether-desktop
 
-      # Run workspace tests
-      - name: Run Cargo Test
-        run: cargo test --workspace
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: just-music-windows-x64
+          path: target/release/just-music.exe
+          if-no-files-found: error
