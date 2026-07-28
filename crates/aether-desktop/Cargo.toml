@@ -24,4 +24,7 @@ chrono = { version = "0.4.38", default-features = false, features = ["clock", "s
 dirs-next = "2.0"
 
 [target.'cfg(windows)'.dependencies]
-windows-sys = { version = "0.59", features = ["Win32_UI_WindowsAndMessaging"] }
+windows-sys = { version = "0.59", features = ["Win32_UI_WindowsAndMessaging", "Win32_UI_Shell"] }
+
+[build-dependencies]
+winres = "0.1"

@@ -8,7 +8,7 @@ pub struct MemoryLruCache<K, V> {
 
 impl<K: std::hash::Hash + Eq, V: Clone> MemoryLruCache<K, V> {
     pub fn new(capacity: usize) -> Self {
-        let cap = NonZeroUsize::new(capacity).unwrap_or(NonZeroUsize::new(100).unwrap());
+        let cap = NonZeroUsize::new(capacity).unwrap_or(NonZeroUsize::MIN);
         Self {
             cache: Mutex::new(LruCache::new(cap)),
         }

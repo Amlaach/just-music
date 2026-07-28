@@ -25,38 +25,33 @@ impl LibraryWatcher {
         let path_clone = watch_path.clone();
         thread::spawn(move || {
             while let Ok(res) = rx.recv() {
-                match res {
-                    Ok(Event {
-                        kind: EventKind::Create(_) | EventKind::Modify(_),
-                        paths,
-                        ..
-                    }) => {
-                        for p in paths {
-                            if p.is_file() {
-                                if let Some(ext) = p.extension().and_then(|s| s.to_str()) {
-                                    if matches!(
-                                        ext.to_lowercase().as_str(),
-                                        "mp3"
-                                            | "flac"
-                                            | "wav"
-                                            | "aac"
-                                            | "m4a"
-                                            | "ogg"
-                                            | "opus"
-                                            | "aiff"
-                                    ) {
-                                        tracing::info!(
-                                            "Real-time library change detected: {:?}",
-                                            p
-                                        );
-                                        let _ = scanner.scan_directory(&path_clone);
-                                        break;
-                                    }
+                if let Ok(Event {
+                    kind: EventKind::Create(_) | EventKind::Modify(_),
+                    paths,
+                    ..
+                }) = res
+                {
+                    for p in paths {
+                        if p.is_file() {
+                            if let Some(ext) = p.extension().and_then(|s| s.to_str()) {
+                                if matches!(
+                                    ext.to_lowercase().as_str(),
+                                    "mp3"
+                                        | "flac"
+                                        | "wav"
+                                        | "aac"
+                                        | "m4a"
+                                        | "ogg"
+                                        | "opus"
+                                        | "aiff"
+                                ) {
+                                    tracing::info!("Real-time library change detected: {:?}", p);
+                                    let _ = scanner.scan_directory(&path_clone);
+                                    break;
                                 }
                             }
                         }
                     }
-                    _ => {}
                 }
             }
         });
@@ -65,5 +60,9 @@ impl LibraryWatcher {
             _watcher: watcher,
             watch_path,
         })
+    }
+
+    pub fn watch_path(&self) -> &Path {
+        &self.watch_path
     }
 }

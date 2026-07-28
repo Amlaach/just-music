@@ -1,10 +1,8 @@
 [package]
-name = "dlltool"
+name = "dlltool-dummy"
 version = "0.1.0"
 edition = "2021"
 
-[workspace]
-
 [[bin]]
-name = "dlltool-v2"
+name = "dlltool"
 path = "src/main.rs"

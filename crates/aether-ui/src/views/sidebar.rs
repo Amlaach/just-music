@@ -3,21 +3,32 @@ use egui::{Align, Color32, Layout, RichText, Sense, Vec2};
 
 pub fn render_sidebar(ui: &mut egui::Ui, state: &mut AppState) {
     let palette = &state.design_system.palette;
+    let is_rtl = state.settings.is_rtl;
 
-    ui.add_space(8.0);
+    ui.add_space(10.0);
 
-    let tabs = [
-        (NavTab::Home, "🏠", "Home"),
-        (NavTab::Playlist, "🎵", "Playlist"),
-        (NavTab::Recent, "🕒", "Recent"),
-        (NavTab::Settings, "⚙️", "Settings"),
-        (NavTab::About, "ℹ️", "About"),
-    ];
+    let tabs = if is_rtl {
+        vec![
+            (NavTab::Home, "🏠", "ראשי"),
+            (NavTab::Playlist, "🎵", "רשימת השמעה"),
+            (NavTab::Recent, "🕒", "אחרונים"),
+            (NavTab::Settings, "⚙️", "הגדרות"),
+            (NavTab::About, "ℹ️", "אודות"),
+        ]
+    } else {
+        vec![
+            (NavTab::Home, "🏠", "Home"),
+            (NavTab::Playlist, "🎵", "Playlist"),
+            (NavTab::Recent, "🕒", "Recent"),
+            (NavTab::Settings, "⚙️", "Settings"),
+            (NavTab::About, "ℹ️", "About"),
+        ]
+    };
 
     for (tab, icon, label) in tabs {
         let is_selected = state.current_tab == tab;
 
-        let (rect, response) = ui.allocate_exact_size(Vec2::new(160.0, 38.0), Sense::click());
+        let (rect, response) = ui.allocate_exact_size(Vec2::new(170.0, 40.0), Sense::click());
 
         let bg = if is_selected {
             palette.primary
@@ -36,10 +47,15 @@ pub fn render_sidebar(ui: &mut egui::Ui, state: &mut AppState) {
         ui.painter().rect_filled(rect, 10.0, bg);
 
         ui.allocate_ui_at_rect(rect, |ui| {
-            ui.with_layout(Layout::left_to_right(Align::Center), |ui| {
-                ui.add_space(14.0);
+            let layout = if is_rtl {
+                Layout::right_to_left(Align::Center)
+            } else {
+                Layout::left_to_right(Align::Center)
+            };
+            ui.with_layout(layout, |ui| {
+                ui.add_space(12.0);
                 ui.label(RichText::new(icon).size(16.0));
-                ui.add_space(8.0);
+                ui.add_space(10.0);
                 let mut text = RichText::new(label).size(14.0).color(text_color);
                 if is_selected {
                     text = text.strong();
@@ -52,6 +68,6 @@ pub fn render_sidebar(ui: &mut egui::Ui, state: &mut AppState) {
             state.current_tab = tab;
         }
 
-        ui.add_space(4.0);
+        ui.add_space(6.0);
     }
 }

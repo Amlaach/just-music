@@ -74,7 +74,10 @@ fn main() {
             Some(handle)
         }
         Err(e) => {
-            tracing::error!("Audio engine failed to initialize: {}. Continuing without audio.", e);
+            tracing::error!(
+                "Audio engine failed to initialize: {}. Continuing without audio.",
+                e
+            );
             None
         }
     };

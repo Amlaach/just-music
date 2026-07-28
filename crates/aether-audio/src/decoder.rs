@@ -1,13 +1,15 @@
 use aether_core::{AetherError, Result};
 use std::fs::File;
 use std::path::{Path, PathBuf};
+use std::time::Duration;
 
 use symphonia::core::audio::{AudioBufferRef, Signal};
 use symphonia::core::codecs::{Decoder, DecoderOptions};
-use symphonia::core::formats::{FormatOptions, FormatReader};
+use symphonia::core::formats::{FormatOptions, FormatReader, SeekMode, SeekTo};
 use symphonia::core::io::MediaSourceStream;
 use symphonia::core::meta::MetadataOptions;
 use symphonia::core::probe::Hint;
+use symphonia::core::units::Time;
 
 pub struct AudioDecoder {
     format_reader: Box<dyn FormatReader>,
@@ -15,6 +17,7 @@ pub struct AudioDecoder {
     track_id: u32,
     sample_rate: u32,
     channels: usize,
+    duration_ms: u64,
 }
 
 impl AudioDecoder {
@@ -105,6 +108,17 @@ impl AudioDecoder {
         let sample_rate = track.codec_params.sample_rate.unwrap_or(44100);
         let channels = track.codec_params.channels.map(|c| c.count()).unwrap_or(2);
 
+        let n_frames = track.codec_params.n_frames;
+        let duration_ms = if let Some(frames) = n_frames {
+            if sample_rate > 0 {
+                (frames * 1000) / sample_rate as u64
+            } else {
+                0
+            }
+        } else {
+            0
+        };
+
         let decoder = symphonia::default::get_codecs()
             .make(&track.codec_params, &decoder_opts)
             .map_err(|e| {
@@ -121,6 +135,7 @@ impl AudioDecoder {
             track_id,
             sample_rate,
             channels,
+            duration_ms,
         })
     }
 
@@ -130,6 +145,22 @@ impl AudioDecoder {
 
     pub fn channels(&self) -> usize {
         self.channels
+    }
+
+    pub fn duration_ms(&self) -> u64 {
+        self.duration_ms
+    }
+
+    pub fn seek(&mut self, time: Duration) -> Result<u64> {
+        let seek_to = SeekTo::Time {
+            time: Time::new(time.as_secs(), time.subsec_nanos() as f64 / 1_000_000_000.0),
+            track_id: Some(self.track_id),
+        };
+
+        match self.format_reader.seek(SeekMode::Accurate, seek_to) {
+            Ok(seeked_to) => Ok(seeked_to.actual_ts),
+            Err(e) => Err(AetherError::Decoder(format!("Seek error: {}", e))),
+        }
     }
 
     pub fn decode_next(&mut self, output: &mut Vec<f32>) -> Result<bool> {
@@ -279,18 +310,22 @@ mod tests {
 
     #[test]
     fn test_decoder_open_non_existent_file_returns_error() {
-        let err = AudioDecoder::open("non_existent_audio_file_12345.mp3");
-        assert!(err.is_err());
-        let err_msg = err.err().unwrap().to_string();
-        assert!(err_msg.contains("Audio file does not exist"));
+        let res = AudioDecoder::open("non_existent_audio_file_12345.mp3");
+        assert!(res.is_err());
+        if let Err(err) = res {
+            let err_msg = err.to_string();
+            assert!(err_msg.contains("Audio file does not exist"));
+        }
     }
 
     #[test]
     fn test_decoder_open_quoted_path_cleaning() {
-        let err = AudioDecoder::open("\"non_existent_file_quoted.wav\"");
-        assert!(err.is_err());
-        let err_msg = err.err().unwrap().to_string();
-        assert!(err_msg.contains("non_existent_file_quoted.wav"));
-        assert!(!err_msg.contains("\"non_existent_file_quoted.wav\""));
+        let res = AudioDecoder::open("\"non_existent_file_quoted.wav\"");
+        assert!(res.is_err());
+        if let Err(err) = res {
+            let err_msg = err.to_string();
+            assert!(err_msg.contains("non_existent_file_quoted.wav"));
+            assert!(!err_msg.contains("\"non_existent_file_quoted.wav\""));
+        }
     }
 }

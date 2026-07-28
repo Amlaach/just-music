@@ -1,6 +1,5 @@
 use crate::db::Database;
-use aether_core::{AetherError, Result, Track, TrackId};
-use rusqlite::params;
+use aether_core::{Result, Track, TrackId};
 
 #[derive(Clone)]
 pub struct InstantSearchEngine {
@@ -9,7 +8,6 @@ pub struct InstantSearchEngine {
 
 impl InstantSearchEngine {
     pub fn new(db: Database) -> Result<Self> {
-        // Initialize FTS5 virtual table in SQLite
         db.execute_fts_init()?;
         Ok(Self { db })
     }

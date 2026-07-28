@@ -3,6 +3,8 @@ use crate::theme::{DesignSystem, ThemeMode};
 use crate::toast::ToastManager;
 use aether_core::{PlayState, PlaybackPosition, Track};
 use serde::{Deserialize, Serialize};
+use std::fs;
+use std::path::PathBuf;
 use std::sync::{Arc, RwLock};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -41,6 +43,7 @@ pub struct AppSettings {
     pub rounded_corners: bool,
     pub enable_blur: bool,
 
+    pub is_rtl: bool,
     pub file_associations_registered: bool,
 }
 
@@ -58,11 +61,12 @@ impl Default for AppSettings {
             crossfade_sec: 2,
             gapless_playback: true,
 
-            theme_mode: ThemeMode::Light,
+            theme_mode: ThemeMode::Dark,
             animation_speed_ms: 150,
             rounded_corners: true,
             enable_blur: true,
 
+            is_rtl: true, // Default to RTL for Hebrew users
             file_associations_registered: false,
         }
     }
@@ -90,6 +94,42 @@ pub struct AppState {
     pub status_text: String,
 }
 
+impl AppState {
+    fn config_path() -> PathBuf {
+        let dir = dirs_next::data_local_dir()
+            .unwrap_or_else(|| PathBuf::from("."))
+            .join("JustMusic");
+        let _ = fs::create_dir_all(&dir);
+        dir.join("config.json")
+    }
+
+    pub fn load_saved() -> Self {
+        let mut state = AppState::default();
+        let path = Self::config_path();
+        if path.exists() {
+            if let Ok(content) = fs::read_to_string(&path) {
+                if let Ok(saved_settings) = serde_json::from_str::<AppSettings>(&content) {
+                    state.design_system = DesignSystem::new(saved_settings.theme_mode);
+                    state.bidi_engine = BiDiEngine::new(if saved_settings.is_rtl {
+                        LayoutDirection::Rtl
+                    } else {
+                        LayoutDirection::Ltr
+                    });
+                    state.settings = saved_settings;
+                }
+            }
+        }
+        state
+    }
+
+    pub fn save_config(&self) {
+        let path = Self::config_path();
+        if let Ok(json) = serde_json::to_string_pretty(&self.settings) {
+            let _ = fs::write(path, json);
+        }
+    }
+}
+
 impl Default for AppState {
     fn default() -> Self {
         let settings = AppSettings::default();
@@ -110,9 +150,9 @@ impl Default for AppState {
             is_muted: false,
             settings,
             design_system,
-            bidi_engine: BiDiEngine::new(LayoutDirection::Ltr),
+            bidi_engine: BiDiEngine::new(LayoutDirection::Rtl),
             toast_manager: ToastManager::default(),
-            status_text: "Ready".to_string(),
+            status_text: "מוכן לנגינה".to_string(),
         }
     }
 }
@@ -132,16 +172,21 @@ impl StateStore {
     where
         F: FnOnce(&AppState) -> R,
     {
-        let guard = self.state.read().unwrap();
-        f(&guard)
+        if let Ok(guard) = self.state.read() {
+            f(&guard)
+        } else {
+            let fallback = AppState::default();
+            f(&fallback)
+        }
     }
 
     pub fn update<F>(&self, f: F)
     where
         F: FnOnce(&mut AppState),
     {
-        let mut guard = self.state.write().unwrap();
-        f(&mut guard);
+        if let Ok(mut guard) = self.state.write() {
+            f(&mut guard);
+        }
     }
 }
 

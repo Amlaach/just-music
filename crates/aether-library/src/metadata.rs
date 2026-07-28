@@ -39,11 +39,14 @@ impl MetadataExtractor {
         let mss = MediaSourceStream::new(Box::new(file), Default::default());
 
         let mut hint = Hint::new();
-        if let Some(ext) = clean_path.extension().and_then(|s| s.to_str()) {
-            let lower_ext = ext.to_lowercase();
-            hint.with_extension(&lower_ext);
+        let ext_str = match clean_path.extension().and_then(|s| s.to_str()) {
+            Some(s) => s.to_lowercase(),
+            None => String::new(),
+        };
 
-            match lower_ext.as_str() {
+        if !ext_str.is_empty() {
+            hint.with_extension(&ext_str);
+            match ext_str.as_str() {
                 "mp3" => {
                     hint.mime_type("audio/mp3");
                 }
@@ -81,21 +84,19 @@ impl MetadataExtractor {
             .default_track()
             .ok_or_else(|| AetherError::Decoder("No audio track".into()))?;
 
-        let duration_ms = track_info
-            .codec_params
-            .n_frames
-            .map(|f| {
+        let duration_ms = match track_info.codec_params.n_frames {
+            Some(f) => {
                 let sr = track_info.codec_params.sample_rate.unwrap_or(44100) as u64;
-                (f * 1000) / sr
-            })
-            .unwrap_or(0);
+                (f * 1000).checked_div(sr).unwrap_or(0)
+            }
+            None => 0,
+        };
 
         let sample_rate = track_info.codec_params.sample_rate.unwrap_or(44100);
-        let channels = track_info
-            .codec_params
-            .channels
-            .map(|c| c.count() as u16)
-            .unwrap_or(2);
+        let channels = match track_info.codec_params.channels {
+            Some(c) => c.count() as u16,
+            None => 2,
+        };
         let bitrate = track_info.codec_params.bits_per_sample;
 
         let mut title = None;
@@ -130,16 +131,12 @@ impl MetadataExtractor {
             }
         }
 
-        let file_name = clean_path
-            .file_stem()
-            .and_then(|s| s.to_str())
-            .unwrap_or("Unknown Track")
-            .to_string();
+        let file_name = match clean_path.file_stem().and_then(|s| s.to_str()) {
+            Some(s) => s.to_string(),
+            None => "Unknown Track".to_string(),
+        };
 
-        let ext = clean_path
-            .extension()
-            .and_then(|s| s.to_str())
-            .unwrap_or("");
+        let format = AudioFormat::from_extension(&ext_str);
 
         Ok(Track {
             id: TrackId::new(),
@@ -154,7 +151,7 @@ impl MetadataExtractor {
             bitrate,
             sample_rate,
             channels,
-            format: AudioFormat::from_extension(ext),
+            format,
             replaygain_track_gain: None,
             replaygain_track_peak: None,
             play_count: 0,

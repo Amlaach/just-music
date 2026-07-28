@@ -37,18 +37,18 @@ impl BiquadFilter {
             return;
         }
 
-        let A = 10.0f32.powf(gain_db / 40.0);
+        let amp = 10.0f32.powf(gain_db / 40.0);
         let omega = 2.0 * PI * center_freq / sample_rate;
         let sn = omega.sin();
         let cs = omega.cos();
         let alpha = sn / (2.0 * q);
 
-        let b0 = 1.0 + alpha * A;
+        let b0 = 1.0 + alpha * amp;
         let b1 = -2.0 * cs;
-        let b2 = 1.0 - alpha * A;
-        let a0 = 1.0 + alpha / A;
+        let b2 = 1.0 - alpha * amp;
+        let a0 = 1.0 + alpha / amp;
         let a1 = -2.0 * cs;
-        let a2 = 1.0 - alpha / A;
+        let a2 = 1.0 - alpha / amp;
 
         self.b0 = b0 / a0;
         self.b1 = b1 / a0;
@@ -117,13 +117,8 @@ impl Equalizer {
     }
 
     fn recalculate(&mut self) {
-        for i in 0..10 {
-            self.bands[i].setup_peaking_eq(
-                self.sample_rate,
-                EQ_FREQUENCIES[i],
-                self.gains_db[i],
-                1.414,
-            );
+        for (i, &gain_db) in self.gains_db.iter().enumerate() {
+            self.bands[i].setup_peaking_eq(self.sample_rate, EQ_FREQUENCIES[i], gain_db, 1.414);
         }
     }
 

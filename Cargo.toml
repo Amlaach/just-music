@@ -7,10 +7,10 @@ members = [
     "crates/aether-library",
     "crates/aether-cache",
     "crates/aether-provider",
-    "crates/aether-plugin",
     "crates/aether-monitor",
     "crates/aether-ui",
     "crates/aether-desktop",
+    "crates/dlltool-dummy",
 ]
 
 [workspace.package]
@@ -33,13 +33,6 @@ rtrb = "0.3"
 cpal = "0.15"
 symphonia = { version = "0.5", features = ["all"] }
 rubato = "0.15"
-
-# Database & Search
-rusqlite = { version = "0.31", features = ["bundled"] }
-libsqlite3-sys = { version = "0.28", features = ["bundled-windows"] }
-
-# Plugin Runtime
-wasmtime = { version = "21.0", default-features = false, features = ["async", "cranelift", "runtime", "std"] }
 
 # GUI Stack
 eframe = { version = "0.28", default-features = false, features = ["glow", "default_fonts"] }
@@ -64,7 +57,6 @@ aether-storage = { path = "crates/aether-storage" }
 aether-library = { path = "crates/aether-library" }
 aether-cache = { path = "crates/aether-cache" }
 aether-provider = { path = "crates/aether-provider" }
-aether-plugin = { path = "crates/aether-plugin" }
 aether-monitor = { path = "crates/aether-monitor" }
 aether-ui = { path = "crates/aether-ui" }
 
