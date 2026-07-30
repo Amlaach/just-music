@@ -22,14 +22,23 @@ pub fn render_about_view(ui: &mut egui::Ui, state: &mut AppState) {
         ui.add_space(15.0);
 
         ui.label(
-            RichText::new("Just Music")
-                .size(24.0)
+            RichText::new("Jost Music")
+                .size(26.0)
                 .strong()
                 .color(palette.text_primary),
         );
 
         ui.label(
-            RichText::new("Commercial Production High-Performance Desktop Audio Engine")
+            RichText::new("מוזיקה")
+                .size(16.0)
+                .strong()
+                .color(palette.accent),
+        );
+
+        ui.add_space(8.0);
+
+        ui.label(
+            RichText::new("High-Performance Luxury Dark Crimson Desktop Audio Software")
                 .size(13.0)
                 .color(palette.text_secondary),
         );
@@ -37,32 +46,32 @@ pub fn render_about_view(ui: &mut egui::Ui, state: &mut AppState) {
         ui.add_space(20.0);
 
         ui.group(|ui| {
-            ui.set_max_width(400.0);
+            ui.set_max_width(420.0);
             ui.vertical(|ui| {
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("Version:").strong());
-                    ui.label("v1.0.0");
+                    ui.label(RichText::new("Version / גרסה:").strong());
+                    ui.label("v1.0.0 Premium");
                 });
                 ui.add_space(6.0);
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("License:").strong());
-                    ui.label("MIT License");
+                    ui.label(RichText::new("Developer / מפתח:").strong());
+                    ui.label("Amlaach / Jost Systems");
                 });
                 ui.add_space(6.0);
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("Architecture:").strong());
+                    ui.label(RichText::new("Architecture / ארכיטקטורה:").strong());
                     ui.label("Pure Rust Lock-Free Headless Audio Engine");
                 });
                 ui.add_space(6.0);
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new("GUI Framework:").strong());
-                    ui.label("Modern Native Pure Rust Presentation Layer");
+                    ui.label(RichText::new("GUI / ממשק:").strong());
+                    ui.label("Eframe/Egui Dark Crimson & Cyan Palette");
                 });
             });
         });
 
         ui.add_space(20.0);
 
-        ui.hyperlink_to("🔗 Open GitHub Repository", "https://github.com/Amlaach");
+        ui.hyperlink_to("📂 צפה בפרויקט ב-GitHub / Open GitHub Repository", "https://github.com/Amlaach/just-music");
     });
 }

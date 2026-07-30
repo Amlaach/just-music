@@ -170,6 +170,11 @@ pub fn render_settings_view(ui: &mut egui::Ui, state: &mut AppState) {
             };
             let light_label = if is_rtl { "בהיר" } else { "Light" };
             let dark_label = if is_rtl { "כהה" } else { "Dark" };
+            let night_red_label = if is_rtl {
+                "מצב לילה מוגבר (Deep Dark Red)"
+            } else {
+                "Deep Dark Night Red"
+            };
             let sys_label = if is_rtl {
                 "לפי מערכת"
             } else {
@@ -184,6 +189,11 @@ pub fn render_settings_view(ui: &mut egui::Ui, state: &mut AppState) {
                     light_label,
                 );
                 ui.selectable_value(&mut state.settings.theme_mode, ThemeMode::Dark, dark_label);
+                ui.selectable_value(
+                    &mut state.settings.theme_mode,
+                    ThemeMode::DeepNightRed,
+                    night_red_label,
+                );
                 ui.selectable_value(&mut state.settings.theme_mode, ThemeMode::System, sys_label);
             });
 

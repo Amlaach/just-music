@@ -38,16 +38,17 @@ pub fn render_header(ui: &mut egui::Ui, state: &mut AppState) {
                 );
 
                 ui.label(
-                    RichText::new("Just Music")
+                    RichText::new("Jost Music")
                         .size(16.0)
                         .strong()
                         .color(palette.text_primary),
                 );
 
                 ui.label(
-                    RichText::new("v1.0")
-                        .size(11.0)
-                        .color(palette.text_secondary),
+                    RichText::new("מוזיקה")
+                        .size(13.0)
+                        .strong()
+                        .color(palette.accent),
                 );
             },
         );
