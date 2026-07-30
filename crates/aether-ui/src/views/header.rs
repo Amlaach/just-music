@@ -58,8 +58,11 @@ pub fn render_header(ui: &mut egui::Ui, state: &mut AppState) {
             let button_size = Vec2::new(32.0, 26.0);
 
             // Close
-            let (rect, mut response) = ui.allocate_exact_size(button_size, Sense::click());
-            let close_bg = if response.hovered() {
+            let (rect, response) = ui.allocate_exact_size(button_size, Sense::click());
+            let is_hovered = response.hovered();
+            let is_clicked = response.clicked();
+
+            let close_bg = if is_hovered {
                 Color32::from_rgb(227, 92, 92)
             } else {
                 Color32::TRANSPARENT
@@ -70,24 +73,26 @@ pub fn render_header(ui: &mut egui::Ui, state: &mut AppState) {
                 Align2::CENTER_CENTER,
                 "✕",
                 egui::FontId::proportional(12.0),
-                if response.hovered() {
+                if is_hovered {
                     Color32::WHITE
                 } else {
                     palette.text_secondary
                 },
             );
-            if response.hovered() {
-                response = response.on_hover_text(if state.settings.is_rtl { "סגור" } else { "Close" });
+            if is_hovered {
+                response.on_hover_text(if state.settings.is_rtl { "סגור" } else { "Close" });
             }
-            if response.clicked() {
+            if is_clicked {
                 ui.ctx().send_viewport_cmd(ViewportCommand::Close);
             }
 
             // Maximize / Restore
-            let (rect, mut response) = ui.allocate_exact_size(button_size, Sense::click());
-            if response.hovered() {
+            let (rect, response) = ui.allocate_exact_size(button_size, Sense::click());
+            let is_hovered = response.hovered();
+            let is_clicked = response.clicked();
+
+            if is_hovered {
                 ui.painter().rect_filled(rect, 6.0, palette.borders);
-                response = response.on_hover_text(if state.settings.is_rtl { "הגדל / השב" } else { "Maximize / Restore" });
             }
             ui.painter().text(
                 rect.center(),
@@ -96,18 +101,23 @@ pub fn render_header(ui: &mut egui::Ui, state: &mut AppState) {
                 egui::FontId::proportional(14.0),
                 palette.text_secondary,
             );
-            if response.clicked() {
+            if is_hovered {
+                response.on_hover_text(if state.settings.is_rtl { "הגדל / השב" } else { "Maximize / Restore" });
+            }
+            if is_clicked {
                 let is_maximized = ui.input(|i| i.viewport().maximized.unwrap_or_default());
                 ui.ctx()
                     .send_viewport_cmd(ViewportCommand::Maximized(!is_maximized));
             }
 
             // Minimize
-            let (rect, mut response) = ui.allocate_exact_size(button_size, Sense::click());
+            let (rect, response) = ui.allocate_exact_size(button_size, Sense::click());
             if response.hovered() {
                 ui.painter().rect_filled(rect, 6.0, palette.borders);
-                response = response.on_hover_text(if state.settings.is_rtl { "מזער" } else { "Minimize" });
             }
+            let is_hovered = response.hovered();
+            let is_clicked = response.clicked();
+
             ui.painter().text(
                 rect.center(),
                 Align2::CENTER_CENTER,
@@ -115,7 +125,10 @@ pub fn render_header(ui: &mut egui::Ui, state: &mut AppState) {
                 egui::FontId::proportional(12.0),
                 palette.text_secondary,
             );
-            if response.clicked() {
+            if is_hovered {
+                response.on_hover_text(if state.settings.is_rtl { "מזער" } else { "Minimize" });
+            }
+            if is_clicked {
                 ui.ctx().send_viewport_cmd(ViewportCommand::Minimized(true));
             }
 
