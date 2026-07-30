@@ -6,6 +6,63 @@ use eframe::App;
 use egui::{Align2, Color32, Rect, Vec2};
 use std::time::Duration;
 
+fn setup_custom_fonts(ctx: &egui::Context) {
+    let mut fonts = egui::FontDefinitions::default();
+
+    // Load Windows system fonts with full Hebrew support
+    let font_paths = [
+        "C:\\Windows\\Fonts\\segoeui.ttf",
+        "C:\\Windows\\Fonts\\arial.ttf",
+        "C:\\Windows\\Fonts\\tahoma.ttf",
+        "C:\\Windows\\Fonts\\david.ttf",
+    ];
+
+    for path in &font_paths {
+        if let Ok(font_bytes) = std::fs::read(path) {
+            fonts.font_data.insert(
+                "HebrewSystemFont".to_owned(),
+                egui::FontData::from_owned(font_bytes),
+            );
+            fonts
+                .families
+                .entry(egui::FontFamily::Proportional)
+                .or_default()
+                .insert(0, "HebrewSystemFont".to_owned());
+            fonts
+                .families
+                .entry(egui::FontFamily::Monospace)
+                .or_default()
+                .push("HebrewSystemFont".to_owned());
+            break;
+        }
+    }
+
+    // Load Emoji & Icon font for window controls and icons
+    let emoji_paths = [
+        "C:\\Windows\\Fonts\\seguiemj.ttf",
+        "C:\\Windows\\Fonts\\symbol.ttf",
+    ];
+    for path in &emoji_paths {
+        if let Ok(font_bytes) = std::fs::read(path) {
+            fonts.font_data.insert(
+                "EmojiSystemFont".to_owned(),
+                egui::FontData::from_owned(font_bytes).tweak(egui::FontTweak {
+                    scale: 0.85,
+                    ..Default::default()
+                }),
+            );
+            fonts
+                .families
+                .entry(egui::FontFamily::Proportional)
+                .or_default()
+                .push("EmojiSystemFont".to_owned());
+            break;
+        }
+    }
+
+    ctx.set_fonts(fonts);
+}
+
 pub struct JustMusicApp {
     pub state: AppState,
     pub audio_handle: Option<AudioEngineHandle>,
@@ -13,7 +70,26 @@ pub struct JustMusicApp {
 
 impl JustMusicApp {
     pub fn new(cc: &eframe::CreationContext<'_>, audio_handle: Option<AudioEngineHandle>) -> Self {
-        let state = AppState::load_saved();
+        let mut state = AppState::load_saved();
+
+        setup_custom_fonts(&cc.egui_ctx);
+
+        // Auto-scan User Music directory on first startup if playlist is empty
+        if state.playlist.is_empty() {
+            let mut music_dir = None;
+            if let Ok(home) = std::env::var("USERPROFILE") {
+                let p = std::path::PathBuf::from(home).join("Music");
+                if p.exists() {
+                    music_dir = Some(p);
+                }
+            }
+            if let Some(path) = music_dir {
+                home_view::scan_music_folder(&path, &mut state);
+                if let Some(first_track) = state.playlist.first().cloned() {
+                    state.current_track = Some(first_track);
+                }
+            }
+        }
 
         let palette = state.design_system.palette.clone();
         let mut visuals = match state.settings.theme_mode {

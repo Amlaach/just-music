@@ -76,6 +76,9 @@ pub fn render_header(ui: &mut egui::Ui, state: &mut AppState) {
                     palette.text_secondary
                 },
             );
+            if response.hovered() {
+                response.on_hover_text(if state.settings.is_rtl { "סגור" } else { "Close" });
+            }
             if response.clicked() {
                 ui.ctx().send_viewport_cmd(ViewportCommand::Close);
             }
@@ -84,6 +87,7 @@ pub fn render_header(ui: &mut egui::Ui, state: &mut AppState) {
             let (rect, response) = ui.allocate_exact_size(button_size, Sense::click());
             if response.hovered() {
                 ui.painter().rect_filled(rect, 6.0, palette.borders);
+                response.on_hover_text(if state.settings.is_rtl { "הגדל / השב" } else { "Maximize / Restore" });
             }
             ui.painter().text(
                 rect.center(),
@@ -102,6 +106,7 @@ pub fn render_header(ui: &mut egui::Ui, state: &mut AppState) {
             let (rect, response) = ui.allocate_exact_size(button_size, Sense::click());
             if response.hovered() {
                 ui.painter().rect_filled(rect, 6.0, palette.borders);
+                response.on_hover_text(if state.settings.is_rtl { "מזער" } else { "Minimize" });
             }
             ui.painter().text(
                 rect.center(),
@@ -124,6 +129,7 @@ pub fn render_header(ui: &mut egui::Ui, state: &mut AppState) {
             };
             if ui
                 .button(RichText::new(lang_label).size(13.0).color(palette.primary))
+                .on_hover_text(if state.settings.is_rtl { "החלף שפה (עברית / English)" } else { "Switch Language (Hebrew / English)" })
                 .clicked()
             {
                 state.settings.is_rtl = !state.settings.is_rtl;
@@ -140,12 +146,14 @@ pub fn render_header(ui: &mut egui::Ui, state: &mut AppState) {
             // Quick Settings & About icons
             if ui
                 .button(RichText::new("⚙").size(15.0).color(palette.text_secondary))
+                .on_hover_text(if state.settings.is_rtl { "הגדרות" } else { "Settings" })
                 .clicked()
             {
                 state.current_tab = NavTab::Settings;
             }
             if ui
                 .button(RichText::new("ℹ").size(15.0).color(palette.text_secondary))
+                .on_hover_text(if state.settings.is_rtl { "אודות" } else { "About" })
                 .clicked()
             {
                 state.current_tab = NavTab::About;

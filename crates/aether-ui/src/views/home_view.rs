@@ -54,35 +54,65 @@ pub fn render_home_view(
             );
             ui.add_space(10.0);
 
-            // Open File Button
-            let btn_text = if is_rtl {
-                "📂 פתח קובץ שמע"
-            } else {
-                "📂 Open File"
-            };
-            let btn = egui::Button::new(
-                RichText::new(btn_text)
-                    .size(14.0)
-                    .strong()
-                    .color(Color32::WHITE),
-            )
-            .fill(palette.primary)
-            .rounding(10.0)
-            .min_size(Vec2::new(160.0, 38.0));
+            // Open File and Scan Folder Buttons
+            ui.horizontal(|ui| {
+                let open_btn_text = if is_rtl {
+                    "📂 פתח קובץ שמע"
+                } else {
+                    "📂 Open File"
+                };
+                let btn_open = egui::Button::new(
+                    RichText::new(open_btn_text)
+                        .size(13.0)
+                        .strong()
+                        .color(Color32::WHITE),
+                )
+                .fill(palette.primary)
+                .rounding(10.0)
+                .min_size(Vec2::new(140.0, 36.0));
 
-            if ui.add(btn).clicked() {
-                if let Some(path) = rfd::FileDialog::new()
-                    .add_filter(
-                        "Audio Files",
-                        &[
-                            "mp3", "flac", "wav", "aac", "ogg", "opus", "m4a", "wma", "aiff",
-                        ],
-                    )
-                    .pick_file()
-                {
-                    load_file(path, state, audio_handle);
+                if ui.add(btn_open).clicked() {
+                    if let Some(path) = rfd::FileDialog::new()
+                        .add_filter(
+                            "Audio Files",
+                            &[
+                                "mp3", "flac", "wav", "aac", "ogg", "opus", "m4a", "wma", "aiff",
+                            ],
+                        )
+                        .pick_file()
+                    {
+                        load_file(path, state, audio_handle);
+                    }
                 }
-            }
+
+                let scan_btn_text = if is_rtl {
+                    "🎵 סרוק תיקיית מוזיקה"
+                } else {
+                    "🎵 Scan Music Folder"
+                };
+                let btn_scan = egui::Button::new(
+                    RichText::new(scan_btn_text)
+                        .size(13.0)
+                        .strong()
+                        .color(palette.text_primary),
+                )
+                .fill(palette.cards)
+                .rounding(10.0)
+                .min_size(Vec2::new(160.0, 36.0));
+
+                if ui.add(btn_scan).clicked() {
+                    if let Some(folder_path) = rfd::FileDialog::new().pick_folder() {
+                        scan_music_folder(&folder_path, state);
+                        let count = state.playlist.len();
+                        let msg = if is_rtl {
+                            format!("הסריקה הושלמה! {count} שירים נטענו")
+                        } else {
+                            format!("Scan Complete! {count} tracks loaded")
+                        };
+                        state.toast_manager.notify(msg);
+                    }
+                }
+            });
         });
     });
 
@@ -195,4 +225,54 @@ pub fn load_file(path: PathBuf, state: &mut AppState, audio_handle: Option<&Audi
         "File Loaded Successfully"
     };
     state.toast_manager.notify(msg);
+}
+
+pub fn scan_music_folder(dir: &std::path::Path, state: &mut AppState) {
+    if let Ok(entries) = std::fs::read_dir(dir) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.is_dir() {
+                scan_music_folder(&path, state);
+            } else if let Some(ext) = path.extension().and_then(|s| s.to_str()) {
+                let ext_lower = ext.to_lowercase();
+                if matches!(
+                    ext_lower.as_str(),
+                    "mp3" | "flac" | "wav" | "aac" | "ogg" | "opus" | "m4a" | "wma" | "aiff"
+                ) {
+                    if !state.playlist.iter().any(|t| t.file_path == path) {
+                        let format = aether_core::AudioFormat::from_extension(&ext_lower);
+                        let title = match path.file_stem() {
+                            Some(s) => s.to_string_lossy().to_string(),
+                            None => "Audio File".to_string(),
+                        };
+                        let artist_str = if state.settings.is_rtl {
+                            "מוזיקה מקומית".to_string()
+                        } else {
+                            "Local Music".to_string()
+                        };
+                        let track = aether_core::Track {
+                            id: aether_core::TrackId::new(),
+                            file_path: path.clone(),
+                            title,
+                            artist: artist_str,
+                            album: "Just Music".to_string(),
+                            genre: None,
+                            year: None,
+                            track_number: None,
+                            duration_ms: 0,
+                            bitrate: Some(320),
+                            sample_rate: 44100,
+                            channels: 2,
+                            format,
+                            replaygain_track_gain: None,
+                            replaygain_track_peak: None,
+                            play_count: 0,
+                            rating: 0,
+                        };
+                        state.playlist.push(track);
+                    }
+                }
+            }
+        }
+    }
 }
