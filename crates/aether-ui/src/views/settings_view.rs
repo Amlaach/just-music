@@ -348,9 +348,9 @@ pub fn render_settings_view(ui: &mut egui::Ui, state: &mut AppState) {
 
         SettingsTab::Updates => {
             let ver_text = if is_rtl {
-                "גרסה נוכחית: v1.0.0 (ייצור)"
+                "גרסה נוכחית: v1.1.0 (ייצור)"
             } else {
-                "Current Version: v1.0.0 (Production)"
+                "Current Version: v1.1.0 (Production)"
             };
             ui.label(RichText::new(ver_text).strong());
             ui.add_space(15.0);

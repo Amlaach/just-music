@@ -50,7 +50,7 @@ pub fn render_about_view(ui: &mut egui::Ui, state: &mut AppState) {
             ui.vertical(|ui| {
                 ui.horizontal(|ui| {
                     ui.label(RichText::new("Version / גרסה:").strong());
-                    ui.label("v1.0.0 Premium");
+                    ui.label("v1.1.0 Premium");
                 });
                 ui.add_space(6.0);
                 ui.horizontal(|ui| {

@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎵 Just Music
+# 🎵 Jost Music (מוזיקה)
 
 **High-Performance Desktop Music Player — Pure Rust**
 
@@ -14,27 +14,37 @@
 
 ---
 
-## ✨ Features
+## ✨ Overview
 
-- **🎧 Multi-Format Audio Playback** — MP3, FLAC, WAV, AAC, OGG Vorbis, Opus, AIFF, ALAC
-- **🔒 Lock-Free Audio Pipeline** — Zero-allocation ring buffer for ultra-low-latency playback
-- **🎛️ 10-Band Graphic Equalizer** — Biquad IIR filters with perceptual logarithmic volume control
-- **🔍 FTS5 Instant Search** — Sub-millisecond full-text search with Unicode support (Hebrew & English)
-- **🇮🇱 RTL/BiDi Support** — Full bidirectional text and layout mirroring for Hebrew
-- **📊 Multi-Tier Cache** — LRU in-memory + persistent disk cache for artwork and waveforms
-- **📁 Drag & Drop** — Drop audio files directly into the player
-- **🎨 Dark & Light Themes** — Premium dark-mode UI with smooth theme switching
-- **📂 Playlist Management** — Create, manage, and play playlists
-- **🕒 Recent History** — Automatically tracks recently played songs
-- **⌨️ Keyboard Shortcuts** — Space (play/pause), Ctrl+O (open), Ctrl+, (settings)
-- **🔗 File Associations** — Register as default audio player in Windows
-- **🧩 WASM Plugin Sandbox** — Isolated WebAssembly plugin execution (Wasmtime)
+**Jost Music** (תת-כותרת: **"מוזיקה"**) is a state-of-the-art, high-performance desktop music application built from the ground up in **Pure Rust**. Featuring a luxury dark crimson & cyan palette, bidirectional text layout (Hebrew RTL default & English LTR), lock-free audio engine, graphic equalizer, and Deep Dark Night Red mode.
 
 ---
 
-## 🖼️ Screenshots
+## 🎨 Design System & Palette
 
-> Coming soon — the app features a custom frameless window with a sleek dark theme, sidebar navigation, playlist view, and a bottom player bar with playback controls.
+- **Main Dark Background**: `#0a0809` (Deep black with subtle crimson tint)
+- **Deep Dark Night Red Mode**: `#050203` (Ultra-dark low-light mode for reduced eye strain)
+- **Primary Crimson**: `#8b0000` / `#9b111e` (Luxury maroon cards & header elements)
+- **Accent Cyan**: `#00e5ff` (Used for logo **מוזיקה** subtitle, active indicators, visualizer, & hover states)
+- **Primary Text**: `#f1f5f9` (Off-white high contrast)
+- **Secondary Text**: `#94a3b8` (Muted light grey)
+
+---
+
+## 🌟 Key Features
+
+- **🎧 Multi-Format Audio Playback** — MP3, FLAC, WAV, AAC, OGG Vorbis, Opus, AIFF, ALAC
+- **🔒 Lock-Free Audio Pipeline** — Zero-allocation ring buffer for ultra-low-latency playback (Symphonia + CPAL)
+- **🇮🇱 RTL/LTR Bidirectional Engine** — Native Hebrew (RTL default) and English (LTR) layout direction switching
+- **🌙 Deep Dark Night Red Mode** — Toggleable `#050203` background mode in settings
+- **🎛️ Graphic Equalizer** — Multi-band frequency tuning with presets (Flat, Pop, Rock, Bass Boost)
+- **🔍 Sub-Millisecond Search** — Sub-millisecond full-text search with Unicode support (Hebrew & English)
+- **📊 Multi-Tier Cache** — LRU in-memory + persistent disk cache for artwork and waveforms
+- **📁 Drag & Drop** — Drop audio files directly into the player window
+- **📂 Playlist Management** — Create, manage, and play custom audio playlists
+- **🕒 History & Favorites** — Track recently played tracks and favorite songs
+- **⌨️ Keyboard Shortcuts** — `Space` (play/pause), `Ctrl+O` (open file), `Ctrl+,` (settings)
+- **🔗 Windows File Associations** — Register as default audio player in Windows
 
 ---
 
@@ -42,11 +52,11 @@
 
 ```
 just-music/
-├── Cargo.toml                         # Workspace Configuration
+├── Cargo.toml                         # Workspace Configuration (v1.1.0)
 └── crates/
     ├── aether-core/                   # Domain Models, Commands & Events
     ├── aether-audio/                  # Headless Audio Engine (Symphonia + CPAL + DSP)
-    ├── aether-storage/                # SQLite Database (WAL) & FTS5 Search Engine
+    ├── aether-storage/                # SQLite Database (WAL) & Search Engine
     ├── aether-library/                # Multi-threaded Folder Scanner & File Watcher
     ├── aether-cache/                  # Multi-Tier LRU Memory & Disk Cache
     ├── aether-provider/               # Async Trait Interfaces for Providers
@@ -58,7 +68,7 @@ just-music/
 
 ---
 
-## 🛠️ Building from Source
+## 🛠️ Building & Testing
 
 ### Prerequisites
 - [Rust Toolchain](https://rustup.rs/) (Stable 1.75+)
@@ -70,16 +80,16 @@ just-music/
 git clone https://github.com/Amlaach/just-music.git
 cd just-music
 
-# Build the desktop app
+# Build the desktop release app
 cargo build --release -p aether-desktop
 
-# Run the desktop app
+# Run the application
 cargo run -p aether-desktop
 ```
 
-The compiled binary will be at `target/release/just-music.exe`.
+The compiled binary will be located at `target/release/just-music.exe`.
 
-### Running Tests
+### Running Automated Tests
 
 ```bash
 cargo test -p aether-core -p aether-audio -p aether-ui -p aether-cache -p aether-monitor
@@ -114,7 +124,7 @@ cargo test -p aether-core -p aether-audio -p aether-ui -p aether-cache -p aether
 
 ## 📦 Downloads
 
-Pre-built binaries are available on the [Releases](https://github.com/Amlaach/just-music/releases) page.
+Pre-built binaries and releases are available on the [Releases](https://github.com/Amlaach/just-music/releases) page.
 
 ---
 
@@ -126,6 +136,6 @@ This project is licensed under the [MIT License](LICENSE).
 
 <div align="center">
 
-**Made with ❤️ and Rust**
+**Made with ❤️ and Rust for Jost Music**
 
 </div>
