@@ -58,7 +58,7 @@ pub fn render_header(ui: &mut egui::Ui, state: &mut AppState) {
             let button_size = Vec2::new(32.0, 26.0);
 
             // Close
-            let (rect, response) = ui.allocate_exact_size(button_size, Sense::click());
+            let (rect, mut response) = ui.allocate_exact_size(button_size, Sense::click());
             let close_bg = if response.hovered() {
                 Color32::from_rgb(227, 92, 92)
             } else {
@@ -77,17 +77,17 @@ pub fn render_header(ui: &mut egui::Ui, state: &mut AppState) {
                 },
             );
             if response.hovered() {
-                response.on_hover_text(if state.settings.is_rtl { "סגור" } else { "Close" });
+                response = response.on_hover_text(if state.settings.is_rtl { "סגור" } else { "Close" });
             }
             if response.clicked() {
                 ui.ctx().send_viewport_cmd(ViewportCommand::Close);
             }
 
             // Maximize / Restore
-            let (rect, response) = ui.allocate_exact_size(button_size, Sense::click());
+            let (rect, mut response) = ui.allocate_exact_size(button_size, Sense::click());
             if response.hovered() {
                 ui.painter().rect_filled(rect, 6.0, palette.borders);
-                response.on_hover_text(if state.settings.is_rtl { "הגדל / השב" } else { "Maximize / Restore" });
+                response = response.on_hover_text(if state.settings.is_rtl { "הגדל / השב" } else { "Maximize / Restore" });
             }
             ui.painter().text(
                 rect.center(),
@@ -103,10 +103,10 @@ pub fn render_header(ui: &mut egui::Ui, state: &mut AppState) {
             }
 
             // Minimize
-            let (rect, response) = ui.allocate_exact_size(button_size, Sense::click());
+            let (rect, mut response) = ui.allocate_exact_size(button_size, Sense::click());
             if response.hovered() {
                 ui.painter().rect_filled(rect, 6.0, palette.borders);
-                response.on_hover_text(if state.settings.is_rtl { "מזער" } else { "Minimize" });
+                response = response.on_hover_text(if state.settings.is_rtl { "מזער" } else { "Minimize" });
             }
             ui.painter().text(
                 rect.center(),
