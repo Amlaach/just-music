@@ -25,27 +25,17 @@ pub fn render_header(ui: &mut egui::Ui, state: &mut AppState) {
             Vec2::new(220.0, 32.0),
             Layout::left_to_right(Align::Center),
             |ui| {
-                let (rect, _response) =
-                    ui.allocate_exact_size(Vec2::new(26.0, 26.0), Sense::hover());
-                ui.painter()
-                    .circle_filled(rect.center(), 13.0, palette.primary);
-                ui.painter().text(
-                    rect.center(),
-                    Align2::CENTER_CENTER,
-                    "🎵",
-                    egui::FontId::proportional(13.0),
-                    Color32::WHITE,
-                );
-
+                ui.label(RichText::new("🎵").size(18.0));
+                ui.add_space(6.0);
                 ui.label(
                     RichText::new("Jost Music")
                         .size(16.0)
                         .strong()
                         .color(palette.text_primary),
                 );
-
+                ui.add_space(6.0);
                 ui.label(
-                    RichText::new("מוזיקה")
+                    RichText::new(crate::bidi::bidi("מוזיקה"))
                         .size(13.0)
                         .strong()
                         .color(palette.accent),
@@ -136,9 +126,9 @@ pub fn render_header(ui: &mut egui::Ui, state: &mut AppState) {
 
             // Language / RTL Switcher Button (עב / EN)
             let lang_label = if state.settings.is_rtl {
-                "🌐 עברית"
+                format!("🌐 {}", crate::bidi::bidi("עברית"))
             } else {
-                "🌐 English"
+                "🌐 English".to_string()
             };
             if ui
                 .button(RichText::new(lang_label).size(13.0).color(palette.primary))

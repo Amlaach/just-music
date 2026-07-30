@@ -172,18 +172,19 @@ pub fn render_player_bar(
         ui.horizontal(|ui| {
             ui.add_space(12.0);
             let state_str = match (state.play_state, is_rtl) {
-                (PlayState::Playing, true) => "▶ מנגן",
-                (PlayState::Playing, false) => "▶ Playing",
-                (PlayState::Paused, true) => "⏸ מושהה",
-                (PlayState::Paused, false) => "⏸ Paused",
-                (PlayState::Stopped, true) => "⏹ מופסק",
-                (PlayState::Stopped, false) => "⏹ Stopped",
+                (PlayState::Playing, true) => format!("▶ {}", crate::bidi::bidi("מנגן")),
+                (PlayState::Playing, false) => "▶ Playing".to_string(),
+                (PlayState::Paused, true) => format!("⏸ {}", crate::bidi::bidi("מושהה")),
+                (PlayState::Paused, false) => "⏸ Paused".to_string(),
+                (PlayState::Stopped, true) => format!("⏹ {}", crate::bidi::bidi("מופסק")),
+                (PlayState::Stopped, false) => "⏹ Stopped".to_string(),
             };
-            let status_prefix = if is_rtl { "סטטוס" } else { "Status" };
+            let status_prefix = if is_rtl { crate::bidi::bidi("סטטוס") } else { "Status".to_string() };
+            let display_status = if is_rtl { crate::bidi::bidi(&state.status_text) } else { state.status_text.clone() };
             ui.label(
                 RichText::new(format!(
                     "{}: {} | {}",
-                    status_prefix, state_str, state.status_text
+                    status_prefix, state_str, display_status
                 ))
                 .size(11.0)
                 .color(palette.text_secondary),

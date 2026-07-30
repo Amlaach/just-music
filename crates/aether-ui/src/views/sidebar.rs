@@ -56,7 +56,12 @@ pub fn render_sidebar(ui: &mut egui::Ui, state: &mut AppState) {
                 ui.add_space(12.0);
                 ui.label(RichText::new(icon).size(16.0));
                 ui.add_space(10.0);
-                let mut text = RichText::new(label).size(14.0).color(text_color);
+                let display_label = if is_rtl {
+                    crate::bidi::bidi(label)
+                } else {
+                    label.to_string()
+                };
+                let mut text = RichText::new(display_label).size(14.0).color(text_color);
                 if is_selected {
                     text = text.strong();
                 }

@@ -34,9 +34,9 @@ pub fn render_home_view(
 
             // Main Label
             let drag_text = if is_rtl {
-                "גרור קבצי מוזיקה לכאן"
+                crate::bidi::bidi("גרור קבצי מוזיקה לכאן")
             } else {
-                "Drag Music Files Here"
+                "Drag Music Files Here".to_string()
             };
             ui.label(
                 RichText::new(drag_text)
@@ -46,7 +46,7 @@ pub fn render_home_view(
             );
 
             ui.add_space(4.0);
-            let or_text = if is_rtl { "או" } else { "or" };
+            let or_text = if is_rtl { crate::bidi::bidi("או") } else { "or".to_string() };
             ui.label(
                 RichText::new(or_text)
                     .size(13.0)
@@ -57,9 +57,9 @@ pub fn render_home_view(
             // Open File and Scan Folder Buttons
             ui.horizontal(|ui| {
                 let open_btn_text = if is_rtl {
-                    "📂 פתח קובץ שמע"
+                    format!("📂 {}", crate::bidi::bidi("פתח קובץ שמע"))
                 } else {
-                    "📂 Open File"
+                    "📂 Open File".to_string()
                 };
                 let btn_open = egui::Button::new(
                     RichText::new(open_btn_text)
@@ -86,9 +86,9 @@ pub fn render_home_view(
                 }
 
                 let scan_btn_text = if is_rtl {
-                    "🎵 סרוק תיקיית מוזיקה"
+                    format!("🎵 {}", crate::bidi::bidi("סרוק תיקיית מוזיקה"))
                 } else {
-                    "🎵 Scan Music Folder"
+                    "🎵 Scan Music Folder".to_string()
                 };
                 let btn_scan = egui::Button::new(
                     RichText::new(scan_btn_text)
@@ -105,7 +105,7 @@ pub fn render_home_view(
                         scan_music_folder(&folder_path, state);
                         let count = state.playlist.len();
                         let msg = if is_rtl {
-                            format!("הסריקה הושלמה! {count} שירים נטענו")
+                            format!("{} {} !", crate::bidi::bidi("שירים נטענו"), count)
                         } else {
                             format!("Scan Complete! {count} tracks loaded")
                         };
@@ -131,14 +131,16 @@ pub fn render_home_view(
                 ui.label(RichText::new("🎵").size(24.0));
                 ui.add_space(10.0);
                 ui.vertical(|ui| {
+                    let display_title = if is_rtl { crate::bidi::bidi(&track.title) } else { track.title.clone() };
+                    let display_artist = if is_rtl { crate::bidi::bidi(&track.artist) } else { track.artist.clone() };
                     ui.label(
-                        RichText::new(&track.title)
+                        RichText::new(display_title)
                             .size(16.0)
                             .strong()
                             .color(palette.text_primary),
                     );
                     ui.label(
-                        RichText::new(&track.artist)
+                        RichText::new(display_artist)
                             .size(13.0)
                             .color(palette.text_secondary),
                     );
@@ -149,14 +151,14 @@ pub fn render_home_view(
         ui.vertical_centered(|ui| {
             ui.add_space(30.0);
             let empty_title = if is_rtl {
-                "עדיין לא נטען קובץ מוזיקה"
+                crate::bidi::bidi("עדיין לא נטען קובץ מוזיקה")
             } else {
-                "No music loaded yet"
+                "No music loaded yet".to_string()
             };
             let empty_sub = if is_rtl {
-                "גרור קבצים לכאן או לחץ על פתח קובץ להתחלת האזנה"
+                crate::bidi::bidi("גרור קבצים לכאן או לחץ על פתח קובץ להתחלת האזנה")
             } else {
-                "Drag files here or click Open File to start listening"
+                "Drag files here or click Open File to start listening".to_string()
             };
             ui.label(
                 RichText::new(empty_title)
