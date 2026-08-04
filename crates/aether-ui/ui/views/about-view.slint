@@ -1,0 +1,88 @@
+import { Theme } from "../theme.slint";
+
+export component AboutView {
+    VerticalLayout {
+        alignment: center;
+        spacing: 32px;
+        padding: 48px;
+        
+        VerticalLayout {
+            alignment: center;
+            spacing: 8px;
+            
+            HorizontalLayout {
+                alignment: center;
+                spacing: 8px;
+                Text {
+                    text: "Jost Music";
+                    font-size: 42px;
+                    font-weight: 800;
+                    color: Theme.text;
+                }
+                Text {
+                    text: "מוזיקה";
+                    font-size: 42px;
+                    font-weight: 800;
+                    color: Theme.accent;
+                }
+            }
+            
+            Text {
+                text: "v1.1.0";
+                font-size: 16px;
+                color: Theme.text-muted;
+                horizontal-alignment: center;
+            }
+        }
+        
+        Text {
+            text: Theme.language == "he" ? 
+                  "נגן מוזיקה מהיר, מודרני ויפהפה הכתוב ב-Rust." : 
+                  "A fast, modern, and beautiful music player written in Rust.";
+            font-size: 16px;
+            color: Theme.text;
+            horizontal-alignment: center;
+        }
+        
+        Text {
+            text: "Made with ❤️ and Rust";
+            font-size: 14px;
+            color: Theme.primary;
+            horizontal-alignment: center;
+            font-weight: 600;
+        }
+        
+        HorizontalLayout {
+            alignment: center;
+            spacing: 24px;
+            
+            Text { text: "GitHub"; color: Theme.accent; font-size: 14px; }
+            Text { text: "License"; color: Theme.accent; font-size: 14px; }
+        }
+        
+        Rectangle {
+            background: Theme.surface;
+            border-radius: 12px;
+            padding: 24px;
+            width: 400px;
+            
+            VerticalLayout {
+                spacing: 12px;
+                Text {
+                    text: Theme.language == "he" ? "קיצורי מקלדת" : "Keyboard Shortcuts";
+                    font-size: 18px;
+                    font-weight: 700;
+                    color: Theme.text;
+                    horizontal-alignment: center;
+                    padding-bottom: 12px;
+                }
+                
+                HorizontalLayout { alignment: space-between; Text { text: "Space"; color: Theme.accent; font-weight: 600;} Text { text: "Play / Pause"; color: Theme.text-muted; } }
+                HorizontalLayout { alignment: space-between; Text { text: "Ctrl + Right"; color: Theme.accent; font-weight: 600;} Text { text: "Next Track"; color: Theme.text-muted; } }
+                HorizontalLayout { alignment: space-between; Text { text: "Ctrl + Left"; color: Theme.accent; font-weight: 600;} Text { text: "Previous Track"; color: Theme.text-muted; } }
+                HorizontalLayout { alignment: space-between; Text { text: "Ctrl + Up"; color: Theme.accent; font-weight: 600;} Text { text: "Volume Up"; color: Theme.text-muted; } }
+                HorizontalLayout { alignment: space-between; Text { text: "Ctrl + Down"; color: Theme.accent; font-weight: 600;} Text { text: "Volume Down"; color: Theme.text-muted; } }
+            }
+        }
+    }
+}

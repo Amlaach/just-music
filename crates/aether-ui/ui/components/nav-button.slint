@@ -1,0 +1,72 @@
+import { Theme } from "../theme.slint";
+
+export component NavButton {
+    in property <string> icon;
+    in property <string> label;
+    in property <bool> is-active;
+
+    callback clicked();
+
+    height: 44px;
+    width: 100%;
+
+    Rectangle {
+        background: touch.has-hover ? Theme.cards-hover : transparent;
+        animate background { duration: Theme.anim-fast; }
+        
+        if !Theme.is-rtl: HorizontalLayout {
+            padding-left: Theme.spacing-md;
+            padding-right: Theme.spacing-md;
+            spacing: Theme.spacing-sm;
+            Text {
+                text: root.icon;
+                color: root.is-active ? Theme.accent : Theme.text-secondary;
+                font-size: Theme.font-lg;
+                vertical-alignment: center;
+            }
+            Text {
+                text: root.label;
+                color: root.is-active ? Theme.text-primary : Theme.text-secondary;
+                font-size: Theme.font-md;
+                vertical-alignment: center;
+                horizontal-alignment: left;
+            }
+        }
+        
+        if Theme.is-rtl: HorizontalLayout {
+            padding-left: Theme.spacing-md;
+            padding-right: Theme.spacing-md;
+            spacing: Theme.spacing-sm;
+            Text {
+                text: root.label;
+                color: root.is-active ? Theme.text-primary : Theme.text-secondary;
+                font-size: Theme.font-md;
+                vertical-alignment: center;
+                horizontal-alignment: right;
+            }
+            Text {
+                text: root.icon;
+                color: root.is-active ? Theme.accent : Theme.text-secondary;
+                font-size: Theme.font-lg;
+                vertical-alignment: center;
+            }
+        }
+
+        if root.is-active && !Theme.is-rtl : Rectangle {
+            x: 0;
+            width: 3px;
+            height: 100%;
+            background: Theme.accent;
+        }
+        if root.is-active && Theme.is-rtl : Rectangle {
+            x: parent.width - 3px;
+            width: 3px;
+            height: 100%;
+            background: Theme.accent;
+        }
+    }
+
+    touch := TouchArea {
+        clicked => { root.clicked(); }
+    }
+}

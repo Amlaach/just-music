@@ -1,0 +1,173 @@
+import { Theme } from "../theme.slint";
+import { IconButton } from "icon-button.slint";
+import { ProgressBar } from "progress-bar.slint";
+import { VolumeSlider } from "volume-slider.slint";
+
+export component PlayerBar {
+    in property <bool> is-playing: false;
+    in property <float> progress: 0.0;
+    in property <string> current-time: "0:00";
+    in property <string> total-time: "0:00";
+    in property <string> track-title: "No Track";
+    in property <string> track-artist: "Unknown Artist";
+    in property <float> volume: 1.0;
+    in property <bool> is-muted: false;
+
+    callback play-pause();
+    callback stop();
+    callback next-track();
+    callback prev-track();
+    callback seek(float);
+    callback set-volume(float);
+    callback toggle-mute();
+
+    height: 94px;
+    width: 100%;
+
+    Rectangle {
+        width: 100%;
+        height: 100%;
+        background: Theme.cards;
+        
+        Rectangle {
+            y: 0;
+            width: 100%;
+            height: 1px;
+            background: Theme.borders;
+        }
+
+        if !Theme.is-rtl : HorizontalLayout {
+            padding: Theme.spacing-md;
+            spacing: Theme.spacing-xl;
+            
+            // Section 1: Track Info
+            HorizontalLayout {
+                width: 250px;
+                spacing: Theme.spacing-md;
+                
+                Rectangle {
+                    width: 60px;
+                    height: 60px;
+                    border-radius: Theme.radius-sm;
+                    background: Theme.sidebar-bg;
+                    Text { text: "♪"; font-size: 24px; color: Theme.text-disabled; horizontal-alignment: center; vertical-alignment: center; }
+                }
+                
+                VerticalLayout {
+                    alignment: center;
+                    Text { text: root.track-title; color: Theme.text-primary; font-size: Theme.font-md; font-weight: 700; overflow: elide; }
+                    Text { text: root.track-artist; color: Theme.text-secondary; font-size: Theme.font-sm; overflow: elide; }
+                }
+            }
+            
+            // Section 2: Controls
+            VerticalLayout {
+                horizontal-stretch: 1;
+                alignment: center;
+                spacing: Theme.spacing-sm;
+                
+                HorizontalLayout {
+                    alignment: center;
+                    spacing: Theme.spacing-md;
+                    
+                    IconButton { icon: "⏮"; clicked => { root.prev-track(); } }
+                    IconButton { icon: "⏪"; clicked => { /* optional */ } }
+                    IconButton {
+                        icon: root.is-playing ? "⏸" : "▶";
+                        button-size: 40px;
+                        icon-color: Theme.accent;
+                        clicked => { root.play-pause(); }
+                    }
+                    IconButton { icon: "⏩"; clicked => { /* optional */ } }
+                    IconButton { icon: "⏭"; clicked => { root.next-track(); } }
+                }
+                
+                ProgressBar {
+                    progress: root.progress;
+                    current-time: root.current-time;
+                    total-time: root.total-time;
+                    seek(p) => { root.seek(p); }
+                }
+            }
+            
+            // Section 3: Volume
+            HorizontalLayout {
+                width: 200px;
+                alignment: end;
+                VolumeSlider {
+                    volume: root.volume;
+                    is-muted: root.is-muted;
+                    volume-changed(v) => { root.set-volume(v); }
+                    toggle-mute => { root.toggle-mute(); }
+                }
+            }
+        }
+
+        if Theme.is-rtl : HorizontalLayout {
+            padding: Theme.spacing-md;
+            spacing: Theme.spacing-xl;
+            
+            // Section 3: Volume
+            HorizontalLayout {
+                width: 200px;
+                alignment: start;
+                VolumeSlider {
+                    volume: root.volume;
+                    is-muted: root.is-muted;
+                    volume-changed(v) => { root.set-volume(v); }
+                    toggle-mute => { root.toggle-mute(); }
+                }
+            }
+            
+            // Section 2: Controls
+            VerticalLayout {
+                horizontal-stretch: 1;
+                alignment: center;
+                spacing: Theme.spacing-sm;
+                
+                HorizontalLayout {
+                    alignment: center;
+                    spacing: Theme.spacing-md;
+                    
+                    IconButton { icon: "⏭"; clicked => { root.next-track(); } } // Next is right
+                    IconButton { icon: "⏩"; clicked => { /* optional */ } }
+                    IconButton {
+                        icon: root.is-playing ? "⏸" : "▶";
+                        button-size: 40px;
+                        icon-color: Theme.accent;
+                        clicked => { root.play-pause(); }
+                    }
+                    IconButton { icon: "⏪"; clicked => { /* optional */ } }
+                    IconButton { icon: "⏮"; clicked => { root.prev-track(); } }
+                }
+                
+                ProgressBar {
+                    progress: root.progress;
+                    current-time: root.current-time;
+                    total-time: root.total-time;
+                    seek(p) => { root.seek(p); }
+                }
+            }
+            
+            // Section 1: Track Info
+            HorizontalLayout {
+                width: 250px;
+                spacing: Theme.spacing-md;
+                
+                VerticalLayout {
+                    alignment: center;
+                    Text { text: root.track-title; color: Theme.text-primary; font-size: Theme.font-md; font-weight: 700; overflow: elide; horizontal-alignment: right; }
+                    Text { text: root.track-artist; color: Theme.text-secondary; font-size: Theme.font-sm; overflow: elide; horizontal-alignment: right; }
+                }
+                
+                Rectangle {
+                    width: 60px;
+                    height: 60px;
+                    border-radius: Theme.radius-sm;
+                    background: Theme.sidebar-bg;
+                    Text { text: "♪"; font-size: 24px; color: Theme.text-disabled; horizontal-alignment: center; vertical-alignment: center; }
+                }
+            }
+        }
+    }
+}

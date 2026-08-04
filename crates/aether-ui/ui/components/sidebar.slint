@@ -1,0 +1,75 @@
+import { Theme } from "../theme.slint";
+import { NavButton } from "nav-button.slint";
+
+export component Sidebar {
+    in-out property <int> current-tab: 0;
+
+    width: 220px;
+    height: 100%;
+
+    Rectangle {
+        width: 100%;
+        height: 100%;
+        background: Theme.sidebar-bg;
+        
+        if !Theme.is-rtl : Rectangle {
+            x: parent.width - 1px;
+            width: 1px;
+            height: 100%;
+            background: Theme.borders;
+        }
+        if Theme.is-rtl : Rectangle {
+            x: 0;
+            width: 1px;
+            height: 100%;
+            background: Theme.borders;
+        }
+
+        VerticalLayout {
+            padding-top: Theme.spacing-md;
+            padding-bottom: Theme.spacing-md;
+            
+            NavButton {
+                icon: "🏠";
+                label: Theme.language == "he" ? "בית" : "Home";
+                is-active: root.current-tab == 0;
+                clicked => { root.current-tab = 0; }
+            }
+            NavButton {
+                icon: "📋";
+                label: Theme.language == "he" ? "פלייליסט" : "Playlist";
+                is-active: root.current-tab == 1;
+                clicked => { root.current-tab = 1; }
+            }
+            NavButton {
+                icon: "🕒";
+                label: Theme.language == "he" ? "אחרונים" : "Recent";
+                is-active: root.current-tab == 2;
+                clicked => { root.current-tab = 2; }
+            }
+            
+            Rectangle { vertical-stretch: 1; }
+
+            NavButton {
+                icon: "⚙️";
+                label: Theme.language == "he" ? "הגדרות" : "Settings";
+                is-active: root.current-tab == 3;
+                clicked => { root.current-tab = 3; }
+            }
+            NavButton {
+                icon: "ℹ️";
+                label: Theme.language == "he" ? "אודות" : "About";
+                is-active: root.current-tab == 4;
+                clicked => { root.current-tab = 4; }
+            }
+            
+            Text {
+                text: "v1.0.0";
+                color: Theme.text-disabled;
+                font-size: Theme.font-xs;
+                horizontal-alignment: center;
+                margin-top: Theme.spacing-md;
+            }
+        }
+    }
+}

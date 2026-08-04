@@ -35,9 +35,7 @@ symphonia = { version = "0.5", features = ["all"] }
 rubato = "0.15"
 
 # GUI Stack
-eframe = { version = "0.28", default-features = false, features = ["glow", "default_fonts"] }
-egui = "0.28"
-egui_extras = { version = "0.28", default-features = false }
+slint = "1.17"
 rfd = "0.14"
 
 # Utilities & Error Handling

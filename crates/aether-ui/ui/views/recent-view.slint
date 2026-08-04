@@ -1,0 +1,113 @@
+import { Theme } from "../theme.slint";
+import { TrackCard } from "../components/track-card.slint";
+
+export struct RecentTrack {
+    title: string,
+    artist: string,
+    album: string,
+    duration: string,
+    is-selected: bool,
+    is-playing: bool,
+    played-at: string,
+}
+
+export component RecentView {
+    in property <[RecentTrack]> recent-tracks: [];
+    
+    callback play-track(int);
+    callback clear-history();
+    
+    VerticalLayout {
+        padding: 24px;
+        spacing: 16px;
+        
+        HorizontalLayout {
+            alignment: space-between;
+            
+            if !Theme.is-rtl: Text {
+                text: "🕒 Recently Played";
+                font-size: 24px;
+                color: Theme.text;
+                font-weight: 700;
+                vertical-alignment: center;
+            }
+            if !Theme.is-rtl: Rectangle {
+                background: Theme.surface;
+                border-width: 1px;
+                border-color: Theme.border;
+                border-radius: 6px;
+                width: 120px;
+                height: 36px;
+                TouchArea { clicked => { root.clear-history() } }
+                Text {
+                    text: "Clear History";
+                    color: Theme.text;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                }
+            }
+            
+            if Theme.is-rtl: Rectangle {
+                background: Theme.surface;
+                border-width: 1px;
+                border-color: Theme.border;
+                border-radius: 6px;
+                width: 120px;
+                height: 36px;
+                TouchArea { clicked => { root.clear-history() } }
+                Text {
+                    text: "נקה היסטוריה";
+                    color: Theme.text;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                }
+            }
+            if Theme.is-rtl: Text {
+                text: "🕒 שירים אחרונים";
+                font-size: 24px;
+                color: Theme.text;
+                font-weight: 700;
+                vertical-alignment: center;
+            }
+        }
+        
+        if root.recent-tracks.length == 0 : Rectangle {
+            VerticalLayout {
+                alignment: center;
+                spacing: 16px;
+                Text {
+                    text: "🕒";
+                    font-size: 64px;
+                    horizontal-alignment: center;
+                }
+                Text {
+                    text: Theme.language == "he" ? "אין היסטוריית ניגון" : "No playback history";
+                    font-size: 20px;
+                    color: Theme.text-muted;
+                    horizontal-alignment: center;
+                }
+            }
+        }
+        
+        if root.recent-tracks.length > 0 : ListView {
+            for track[index] in root.recent-tracks: VerticalLayout {
+                spacing: 4px;
+                Text {
+                    text: track.played-at;
+                    color: Theme.text-muted;
+                    font-size: 11px;
+                    horizontal-alignment: Theme.is-rtl ? right : left;
+                }
+                TrackCard {
+                    title: track.title;
+                    artist: track.artist;
+                    album: track.album;
+                    duration: track.duration;
+                    is-selected: track.is-selected;
+                    is-playing: track.is-playing;
+                    double-clicked => { root.play-track(index) }
+                }
+            }
+        }
+    }
+}

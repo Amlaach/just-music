@@ -1,0 +1,243 @@
+import { Theme } from "../theme.slint";
+
+export component SettingsView {
+    // Settings properties
+    in-out property <bool> start-with-windows: false;
+    in-out property <bool> remember-volume: true;
+    in-out property <bool> restore-playlist: true;
+    in-out property <bool> minimize-to-tray: false;
+    
+    in-out property <float> playback-speed: 1.0;
+    in-out property <int> buffer-size: 150;
+    in-out property <int> crossfade: 0;
+    in-out property <bool> gapless-playback: true;
+    
+    in-out property <int> active-theme: 1; // 0=Light, 1=Dark, 2=Deep Night
+    in-out property <bool> is-rtl: false;
+    in-out property <string> language: "en";
+    in-out property <bool> rounded-corners: true;
+    in-out property <bool> enable-blur: true;
+    
+    in-out property <bool> auto-check-updates: true;
+    in property <string> current-version: "v1.1.0";
+    
+    in-out property <int> current-tab: 0;
+    
+    callback register-default-player();
+    callback check-updates();
+    
+    VerticalLayout {
+        padding: 24px;
+        spacing: 24px;
+        
+        Text {
+            text: Theme.language == "he" ? "⚙️ הגדרות" : "⚙️ Settings";
+            font-size: 24px;
+            color: Theme.text;
+            font-weight: 700;
+            horizontal-alignment: Theme.is-rtl ? right : left;
+        }
+        
+        // Tab bar
+        HorizontalLayout {
+            spacing: 8px;
+            alignment: Theme.is-rtl ? end : start;
+            
+            for tab[index] in (Theme.language == "he" ? 
+                ["כללי", "ניגון", "מראה", "שיוכי קבצים", "עדכונים"] : 
+                ["General", "Playback", "Appearance", "Associations", "Updates"]) : Rectangle {
+                
+                background: root.current-tab == index ? Theme.primary.with-alpha(0.2) : transparent;
+                border-radius: 6px;
+                border-width: 1px;
+                border-color: root.current-tab == index ? Theme.primary : transparent;
+                padding-left: 12px; padding-right: 12px;
+                height: 36px;
+                
+                TouchArea { clicked => { root.current-tab = index; } }
+                
+                Text {
+                    text: tab;
+                    color: root.current-tab == index ? Theme.primary : Theme.text-muted;
+                    vertical-alignment: center;
+                    horizontal-alignment: center;
+                }
+            }
+        }
+        
+        Rectangle {
+            background: Theme.surface;
+            border-radius: Theme.radius-large;
+            padding: 24px;
+            
+            // GENERAL TAB
+            if root.current-tab == 0: VerticalLayout {
+                spacing: 16px;
+                alignment: start;
+                Text { text: Theme.language == "he" ? "הגדרות כלליות" : "General Settings"; font-size: 18px; color: Theme.text; font-weight: 600; horizontal-alignment: Theme.is-rtl ? right : left; }
+                
+                HorizontalLayout {
+                    alignment: Theme.is-rtl ? end : start;
+                    spacing: 12px;
+                    TouchArea { clicked => { root.start-with-windows = !root.start-with-windows; } }
+                    Rectangle { width: 24px; height: 24px; border-radius: 4px; border-width: 2px; border-color: root.start-with-windows ? Theme.primary : Theme.text-muted; background: root.start-with-windows ? Theme.primary : transparent; }
+                    Text { text: Theme.language == "he" ? "הפעלה עם Windows" : "Start with Windows"; color: Theme.text; vertical-alignment: center; }
+                }
+                
+                HorizontalLayout {
+                    alignment: Theme.is-rtl ? end : start;
+                    spacing: 12px;
+                    TouchArea { clicked => { root.remember-volume = !root.remember-volume; } }
+                    Rectangle { width: 24px; height: 24px; border-radius: 4px; border-width: 2px; border-color: root.remember-volume ? Theme.primary : Theme.text-muted; background: root.remember-volume ? Theme.primary : transparent; }
+                    Text { text: Theme.language == "he" ? "זכור עוצמה" : "Remember volume"; color: Theme.text; vertical-alignment: center; }
+                }
+                
+                HorizontalLayout {
+                    alignment: Theme.is-rtl ? end : start;
+                    spacing: 12px;
+                    TouchArea { clicked => { root.restore-playlist = !root.restore-playlist; } }
+                    Rectangle { width: 24px; height: 24px; border-radius: 4px; border-width: 2px; border-color: root.restore-playlist ? Theme.primary : Theme.text-muted; background: root.restore-playlist ? Theme.primary : transparent; }
+                    Text { text: Theme.language == "he" ? "שחזר פלייליסט אחרון" : "Restore last playlist"; color: Theme.text; vertical-alignment: center; }
+                }
+                
+                HorizontalLayout {
+                    alignment: Theme.is-rtl ? end : start;
+                    spacing: 12px;
+                    TouchArea { clicked => { root.minimize-to-tray = !root.minimize-to-tray; } }
+                    Rectangle { width: 24px; height: 24px; border-radius: 4px; border-width: 2px; border-color: root.minimize-to-tray ? Theme.primary : Theme.text-muted; background: root.minimize-to-tray ? Theme.primary : transparent; }
+                    Text { text: Theme.language == "he" ? "מזער למגש" : "Minimize to tray"; color: Theme.text; vertical-alignment: center; }
+                }
+            }
+            
+            // PLAYBACK TAB
+            if root.current-tab == 1: VerticalLayout {
+                spacing: 16px;
+                alignment: start;
+                Text { text: Theme.language == "he" ? "הגדרות ניגון" : "Playback Settings"; font-size: 18px; color: Theme.text; font-weight: 600; horizontal-alignment: Theme.is-rtl ? right : left; }
+                
+                HorizontalLayout {
+                    alignment: Theme.is-rtl ? end : start;
+                    spacing: 12px;
+                    TouchArea { clicked => { root.gapless-playback = !root.gapless-playback; } }
+                    Rectangle { width: 24px; height: 24px; border-radius: 4px; border-width: 2px; border-color: root.gapless-playback ? Theme.primary : Theme.text-muted; background: root.gapless-playback ? Theme.primary : transparent; }
+                    Text { text: Theme.language == "he" ? "ניגון רציף (Gapless)" : "Gapless playback"; color: Theme.text; vertical-alignment: center; }
+                }
+                
+                // Sliders would be custom components, simulating here
+                Text { text: Theme.language == "he" ? "מהירות ניגון: " + root.playback-speed + "x" : "Playback speed: " + root.playback-speed + "x"; color: Theme.text; horizontal-alignment: Theme.is-rtl ? right : left; }
+                Text { text: Theme.language == "he" ? "באפר: " + root.buffer-size + "ms" : "Buffer size: " + root.buffer-size + "ms"; color: Theme.text; horizontal-alignment: Theme.is-rtl ? right : left; }
+                Text { text: Theme.language == "he" ? "קרוספייד: " + root.crossfade + "s" : "Crossfade: " + root.crossfade + "s"; color: Theme.text; horizontal-alignment: Theme.is-rtl ? right : left; }
+            }
+            
+            // APPEARANCE TAB
+            if root.current-tab == 2: VerticalLayout {
+                spacing: 16px;
+                alignment: start;
+                Text { text: Theme.language == "he" ? "מראה" : "Appearance"; font-size: 18px; color: Theme.text; font-weight: 600; horizontal-alignment: Theme.is-rtl ? right : left; }
+                
+                HorizontalLayout {
+                    spacing: 16px;
+                    alignment: Theme.is-rtl ? end : start;
+                    
+                    Rectangle {
+                        width: 100px; height: 80px; border-radius: 8px; border-width: 2px;
+                        border-color: root.active-theme == 0 ? Theme.accent : Theme.border;
+                        background: #fafafa;
+                        TouchArea { clicked => { root.active-theme = 0; } }
+                        Text { text: "Light ☀️"; color: #333333; horizontal-alignment: center; vertical-alignment: center; }
+                    }
+                    Rectangle {
+                        width: 100px; height: 80px; border-radius: 8px; border-width: 2px;
+                        border-color: root.active-theme == 1 ? Theme.accent : Theme.border;
+                        background: #1a1a1a;
+                        TouchArea { clicked => { root.active-theme = 1; } }
+                        Text { text: "Dark 🌙"; color: #ffffff; horizontal-alignment: center; vertical-alignment: center; }
+                    }
+                    Rectangle {
+                        width: 100px; height: 80px; border-radius: 8px; border-width: 2px;
+                        border-color: root.active-theme == 2 ? Theme.accent : Theme.border;
+                        background: #050203;
+                        TouchArea { clicked => { root.active-theme = 2; } }
+                        Text { text: "Deep Night 🔴"; color: #ffcccc; horizontal-alignment: center; vertical-alignment: center; }
+                    }
+                }
+                
+                HorizontalLayout {
+                    alignment: Theme.is-rtl ? end : start;
+                    spacing: 12px;
+                    TouchArea { clicked => { root.is-rtl = !root.is-rtl; } }
+                    Rectangle { width: 24px; height: 24px; border-radius: 4px; border-width: 2px; border-color: root.is-rtl ? Theme.primary : Theme.text-muted; background: root.is-rtl ? Theme.primary : transparent; }
+                    Text { text: Theme.language == "he" ? "ממשק ימין-לשמאל (RTL)" : "RTL / LTR layout direction"; color: Theme.text; vertical-alignment: center; }
+                }
+                
+                HorizontalLayout {
+                    alignment: Theme.is-rtl ? end : start;
+                    spacing: 12px;
+                    TouchArea { clicked => { root.language = root.language == "en" ? "he" : "en"; } }
+                    Rectangle {
+                        background: Theme.surface-elevated;
+                        border-radius: 6px;
+                        padding-left: 12px; padding-right: 12px; height: 32px;
+                        Text { text: root.language == "en" ? "English" : "עברית"; color: Theme.text; vertical-alignment: center; }
+                    }
+                }
+            }
+            
+            // ASSOCIATIONS TAB
+            if root.current-tab == 3: VerticalLayout {
+                spacing: 16px;
+                alignment: start;
+                Text { text: Theme.language == "he" ? "שיוכי קבצים" : "File Associations"; font-size: 18px; color: Theme.text; font-weight: 600; horizontal-alignment: Theme.is-rtl ? right : left; }
+                
+                Rectangle {
+                    background: Theme.primary;
+                    border-radius: 6px;
+                    width: 250px;
+                    height: 40px;
+                    TouchArea { clicked => { root.register-default-player() } }
+                    Text {
+                        text: Theme.language == "he" ? "רשום כנגן ברירת מחדל" : "Register as default player";
+                        color: #ffffff;
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                        font-weight: 600;
+                    }
+                }
+                
+                Text { text: ".mp3, .flac, .wav, .ogg"; color: Theme.text-muted; horizontal-alignment: Theme.is-rtl ? right : left; }
+            }
+            
+            // UPDATES TAB
+            if root.current-tab == 4: VerticalLayout {
+                spacing: 16px;
+                alignment: start;
+                Text { text: Theme.language == "he" ? "עדכונים" : "Updates"; font-size: 18px; color: Theme.text; font-weight: 600; horizontal-alignment: Theme.is-rtl ? right : left; }
+                
+                Text { text: (Theme.language == "he" ? "גרסה נוכחית: " : "Current version: ") + root.current-version; color: Theme.text; horizontal-alignment: Theme.is-rtl ? right : left; }
+                
+                HorizontalLayout {
+                    alignment: Theme.is-rtl ? end : start;
+                    spacing: 12px;
+                    TouchArea { clicked => { root.auto-check-updates = !root.auto-check-updates; } }
+                    Rectangle { width: 24px; height: 24px; border-radius: 4px; border-width: 2px; border-color: root.auto-check-updates ? Theme.primary : Theme.text-muted; background: root.auto-check-updates ? Theme.primary : transparent; }
+                    Text { text: Theme.language == "he" ? "בדוק עדכונים אוטומטית" : "Auto-check updates"; color: Theme.text; vertical-alignment: center; }
+                }
+                
+                Rectangle {
+                    background: Theme.surface-elevated;
+                    border-width: 1px; border-color: Theme.border;
+                    border-radius: 6px;
+                    width: 150px;
+                    height: 40px;
+                    TouchArea { clicked => { root.check-updates() } }
+                    Text {
+                        text: Theme.language == "he" ? "בדוק כעת" : "Check now";
+                        color: Theme.text;
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                    }
+                }
+            }
+        }
+    }
+}

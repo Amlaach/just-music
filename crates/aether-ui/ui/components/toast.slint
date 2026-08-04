@@ -1,0 +1,30 @@
+import { Theme } from "../theme.slint";
+
+export component Toast {
+    in property <string> message;
+    in property <bool> visible: false;
+    in property <float> opacity-level: 1.0;
+
+    width: 300px;
+    height: 48px;
+
+    opacity: root.visible ? root.opacity-level : 0.0;
+    animate opacity { duration: Theme.anim-normal; }
+    y: root.visible ? parent.height - self.height - Theme.spacing-xl : parent.height;
+    animate y { duration: Theme.anim-normal; easing: ease-out; }
+
+    Rectangle {
+        width: 100%;
+        height: 100%;
+        border-radius: Theme.radius-md;
+        background: #222222d0; // Dark semi-transparent
+        
+        Text {
+            text: root.message;
+            color: #ffffff;
+            font-size: Theme.font-md;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+    }
+}

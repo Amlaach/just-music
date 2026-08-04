@@ -1,0 +1,50 @@
+export global Theme {
+    in-out property <bool> is-dark: true;
+    in-out property <bool> is-deep-night-red: false;
+    in-out property <bool> is-rtl: true;
+    in-out property <string> language: "he";
+
+    // Primary Crimson
+    out property <color> primary: #8b0000;
+    out property <color> primary-hover: #9b111e;
+    out property <color> primary-pressed: #600008;
+    
+    // Accent Cyan
+    out property <color> accent: #00e5ff;
+    out property <color> accent-dimmed: #007a8a;
+    
+    // Backgrounds
+    out property <color> background: is-deep-night-red ? #050203 : is-dark ? #0a0809 : #fafafa;
+    out property <color> cards: is-deep-night-red ? #0e0508 : is-dark ? #160a0e : #ffffff;
+    out property <color> cards-hover: is-deep-night-red ? #140810 : is-dark ? #1e0e14 : #f5f5f5;
+    out property <color> borders: is-deep-night-red ? #28050a : is-dark ? #3c0a14 : #e7e7e7;
+    out property <color> sidebar-bg: is-deep-night-red ? #060304 : is-dark ? #0c090a : #f0f0f0;
+    
+    // Text
+    out property <color> text-primary: is-dark || is-deep-night-red ? #f1f5f9 : #222222;
+    out property <color> text-secondary: is-dark || is-deep-night-red ? #94a3b8 : #666666;
+    out property <color> text-disabled: is-dark || is-deep-night-red ? #4a5568 : #999999;
+
+    // Spacing
+    out property <length> radius-sm: 6px;
+    out property <length> radius-md: 10px;
+    out property <length> radius-lg: 16px;
+    out property <length> spacing-xs: 4px;
+    out property <length> spacing-sm: 8px;
+    out property <length> spacing-md: 16px;
+    out property <length> spacing-lg: 24px;
+    out property <length> spacing-xl: 32px;
+
+    // Font sizes
+    out property <length> font-xs: 11px;
+    out property <length> font-sm: 13px;
+    out property <length> font-md: 15px;
+    out property <length> font-lg: 18px;
+    out property <length> font-xl: 22px;
+    out property <length> font-xxl: 28px;
+
+    // Animation durations
+    out property <duration> anim-fast: 150ms;
+    out property <duration> anim-normal: 250ms;
+    out property <duration> anim-slow: 400ms;
+}

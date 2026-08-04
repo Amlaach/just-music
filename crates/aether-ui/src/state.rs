@@ -1,6 +1,3 @@
-use crate::bidi::{BiDiEngine, LayoutDirection};
-use crate::theme::{DesignSystem, ThemeMode};
-use crate::toast::ToastManager;
 use aether_core::{PlayState, PlaybackPosition, Track};
 use serde::{Deserialize, Serialize};
 use std::fs;
@@ -23,6 +20,13 @@ pub enum SettingsTab {
     Appearance,
     Associations,
     Updates,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ThemeMode {
+    Light,
+    Dark,
+    DeepNight,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -87,9 +91,6 @@ pub struct AppState {
     pub is_muted: bool,
 
     pub settings: AppSettings,
-    pub design_system: DesignSystem,
-    pub bidi_engine: BiDiEngine,
-    pub toast_manager: ToastManager,
 
     pub status_text: String,
 }
@@ -109,12 +110,6 @@ impl AppState {
         if path.exists() {
             if let Ok(content) = fs::read_to_string(&path) {
                 if let Ok(saved_settings) = serde_json::from_str::<AppSettings>(&content) {
-                    state.design_system = DesignSystem::new(saved_settings.theme_mode);
-                    state.bidi_engine = BiDiEngine::new(if saved_settings.is_rtl {
-                        LayoutDirection::Rtl
-                    } else {
-                        LayoutDirection::Ltr
-                    });
                     state.settings = saved_settings;
                 }
             }
@@ -133,7 +128,6 @@ impl AppState {
 impl Default for AppState {
     fn default() -> Self {
         let settings = AppSettings::default();
-        let design_system = DesignSystem::new(settings.theme_mode);
         Self {
             current_tab: NavTab::Home,
             current_settings_tab: SettingsTab::General,
@@ -149,9 +143,6 @@ impl Default for AppState {
             volume: 0.85,
             is_muted: false,
             settings,
-            design_system,
-            bidi_engine: BiDiEngine::new(LayoutDirection::Rtl),
-            toast_manager: ToastManager::default(),
             status_text: "מוכן לנגינה".to_string(),
         }
     }

@@ -1,0 +1,122 @@
+import { Theme } from "../theme.slint";
+import { TrackCard } from "../components/track-card.slint";
+import { Track } from "home-view.slint";
+
+export component PlaylistView {
+    in property <[Track]> tracks: [];
+    in property <int> repeat-mode: 0; // 0=off, 1=all, 2=one
+    in property <bool> shuffle: false;
+    
+    callback clear-playlist();
+    callback toggle-shuffle();
+    callback cycle-repeat();
+    callback play-track(int);
+    callback remove-track(int);
+    
+    VerticalLayout {
+        padding: 24px;
+        spacing: 16px;
+        
+        HorizontalLayout {
+            alignment: Theme.is-rtl ? end : start;
+            Text {
+                text: Theme.language == "he" ? "📋 פלייליסט" : "📋 Playlist";
+                font-size: 24px;
+                color: Theme.text;
+                font-weight: 700;
+            }
+        }
+        
+        HorizontalLayout {
+            spacing: 12px;
+            alignment: Theme.is-rtl ? end : start;
+            
+            Rectangle {
+                background: Theme.surface;
+                border-width: 1px;
+                border-color: Theme.border;
+                border-radius: 6px;
+                width: 100px;
+                height: 36px;
+                TouchArea { clicked => { root.clear-playlist() } }
+                Text {
+                    text: Theme.language == "he" ? "נקה" : "Clear";
+                    color: Theme.text;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                }
+            }
+            
+            Rectangle {
+                background: root.shuffle ? Theme.primary.with-alpha(0.2) : Theme.surface;
+                border-width: 1px;
+                border-color: root.shuffle ? Theme.primary : Theme.border;
+                border-radius: 6px;
+                width: 100px;
+                height: 36px;
+                TouchArea { clicked => { root.toggle-shuffle() } }
+                Text {
+                    text: Theme.language == "he" ? "אקראי" : "Shuffle";
+                    color: root.shuffle ? Theme.primary : Theme.text;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                }
+            }
+            
+            Rectangle {
+                background: root.repeat-mode > 0 ? Theme.primary.with-alpha(0.2) : Theme.surface;
+                border-width: 1px;
+                border-color: root.repeat-mode > 0 ? Theme.primary : Theme.border;
+                border-radius: 6px;
+                width: 100px;
+                height: 36px;
+                TouchArea { clicked => { root.cycle-repeat() } }
+                Text {
+                    text: root.repeat-mode == 0 ? (Theme.language == "he" ? "חזרה: כבוי" : "Repeat: Off") :
+                          root.repeat-mode == 1 ? (Theme.language == "he" ? "חזרה: הכל" : "Repeat: All") :
+                          (Theme.language == "he" ? "חזרה: 1" : "Repeat: One");
+                    color: root.repeat-mode > 0 ? Theme.primary : Theme.text;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                }
+            }
+        }
+        
+        Text {
+            text: Theme.language == "he" ? "גרור כדי לשנות סדר" : "Drag to reorder";
+            color: Theme.text-muted;
+            font-size: 12px;
+            horizontal-alignment: Theme.is-rtl ? right : left;
+        }
+        
+        if root.tracks.length == 0 : Rectangle {
+            VerticalLayout {
+                alignment: center;
+                spacing: 16px;
+                Text {
+                    text: "📋";
+                    font-size: 64px;
+                    horizontal-alignment: center;
+                }
+                Text {
+                    text: Theme.language == "he" ? "הפלייליסט ריק" : "Playlist is empty";
+                    font-size: 20px;
+                    color: Theme.text-muted;
+                    horizontal-alignment: center;
+                }
+            }
+        }
+        
+        if root.tracks.length > 0 : ListView {
+            for track[index] in root.tracks: TrackCard {
+                title: track.title;
+                artist: track.artist;
+                album: track.album;
+                duration: track.duration;
+                is-selected: track.is-selected;
+                is-playing: track.is-playing;
+                double-clicked => { root.play-track(index) }
+            }
+        }
+    }
+}

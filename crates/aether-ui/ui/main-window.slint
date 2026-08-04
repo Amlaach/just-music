@@ -1,0 +1,180 @@
+import { Theme } from "theme.slint";
+import { Header } from "components/header.slint";
+import { Sidebar } from "components/sidebar.slint";
+import { PlayerBar } from "components/player-bar.slint";
+
+import { HomeView, Track } from "views/home-view.slint";
+import { PlaylistView } from "views/playlist-view.slint";
+import { RecentView, RecentTrack } from "views/recent-view.slint";
+import { SettingsView } from "views/settings-view.slint";
+import { AboutView } from "views/about-view.slint";
+
+export component MainWindow inherits Window {
+    no-frame: true;
+    title: "Jost Music";
+    min-width: 800px;
+    min-height: 520px;
+    preferred-width: 920px;
+    preferred-height: 620px;
+    background: Theme.background;
+    
+    // Playback properties
+    in property <bool> is-playing: false;
+    in property <float> progress: 0.0;
+    in property <string> current-time: "0:00";
+    in property <string> total-time: "0:00";
+    in property <float> volume: 1.0;
+    in property <bool> is-muted: false;
+    
+    // Track info
+    in property <string> current-track-title: "";
+    in property <string> current-track-artist: "";
+    
+    // Navigation
+    in-out property <string> current-tab: "home"; // home, playlist, recent, settings, about
+    
+    // Models
+    in property <[Track]> tracks: [];
+    in property <[RecentTrack]> recent-tracks: [];
+    
+    // Settings
+    in-out property <bool> start-with-windows: false;
+    in-out property <bool> remember-volume: true;
+    in-out property <bool> restore-playlist: true;
+    in-out property <bool> minimize-to-tray: false;
+    in-out property <float> playback-speed: 1.0;
+    in-out property <int> buffer-size: 150;
+    in-out property <int> crossfade: 0;
+    in-out property <bool> gapless-playback: true;
+    
+    // Theme properties (accessible via global but exposed here if needed by Rust)
+    in-out property <int> active-theme: 1;
+    in-out property <bool> is-rtl: false;
+    in-out property <string> language: "en";
+    
+    // Callbacks
+    callback play-pause();
+    callback stop();
+    callback next-track();
+    callback prev-track();
+    callback seek(float);
+    callback set-volume(float);
+    callback toggle-mute();
+    
+    callback open-file();
+    callback scan-folder();
+    callback play-track(int);
+    
+    callback minimize-window();
+    callback maximize-window();
+    callback close-window();
+    
+    VerticalLayout {
+        Header {
+            height: 42px;
+            title: root.title;
+            minimize => { root.minimize-window() }
+            maximize => { root.maximize-window() }
+            close => { root.close-window() }
+        }
+        
+        HorizontalLayout {
+            // RTL support for layout ordering
+            if Theme.is-rtl : Rectangle {
+                // Main Content
+                clip: true;
+                if root.current-tab == "home" : HomeView {
+                    tracks: root.tracks;
+                    track-count: root.tracks.length;
+                    open-file => { root.open-file() }
+                    scan-folder => { root.scan-folder() }
+                    play-track(idx) => { root.play-track(idx) }
+                }
+                if root.current-tab == "playlist" : PlaylistView {
+                    tracks: root.tracks;
+                    play-track(idx) => { root.play-track(idx) }
+                }
+                if root.current-tab == "recent" : RecentView {
+                    recent-tracks: root.recent-tracks;
+                    play-track(idx) => { root.play-track(idx) }
+                }
+                if root.current-tab == "settings" : SettingsView {
+                    start-with-windows <=> root.start-with-windows;
+                    remember-volume <=> root.remember-volume;
+                    restore-playlist <=> root.restore-playlist;
+                    minimize-to-tray <=> root.minimize-to-tray;
+                    playback-speed <=> root.playback-speed;
+                    buffer-size <=> root.buffer-size;
+                    crossfade <=> root.crossfade;
+                    gapless-playback <=> root.gapless-playback;
+                    active-theme <=> root.active-theme;
+                    is-rtl <=> root.is-rtl;
+                    language <=> root.language;
+                }
+                if root.current-tab == "about" : AboutView {}
+            }
+            if Theme.is-rtl : Sidebar {
+                width: 180px;
+                current-tab <=> root.current-tab;
+            }
+            
+            if !Theme.is-rtl : Sidebar {
+                width: 180px;
+                current-tab <=> root.current-tab;
+            }
+            if !Theme.is-rtl : Rectangle {
+                // Main Content
+                clip: true;
+                if root.current-tab == "home" : HomeView {
+                    tracks: root.tracks;
+                    track-count: root.tracks.length;
+                    open-file => { root.open-file() }
+                    scan-folder => { root.scan-folder() }
+                    play-track(idx) => { root.play-track(idx) }
+                }
+                if root.current-tab == "playlist" : PlaylistView {
+                    tracks: root.tracks;
+                    play-track(idx) => { root.play-track(idx) }
+                }
+                if root.current-tab == "recent" : RecentView {
+                    recent-tracks: root.recent-tracks;
+                    play-track(idx) => { root.play-track(idx) }
+                }
+                if root.current-tab == "settings" : SettingsView {
+                    start-with-windows <=> root.start-with-windows;
+                    remember-volume <=> root.remember-volume;
+                    restore-playlist <=> root.restore-playlist;
+                    minimize-to-tray <=> root.minimize-to-tray;
+                    playback-speed <=> root.playback-speed;
+                    buffer-size <=> root.buffer-size;
+                    crossfade <=> root.crossfade;
+                    gapless-playback <=> root.gapless-playback;
+                    active-theme <=> root.active-theme;
+                    is-rtl <=> root.is-rtl;
+                    language <=> root.language;
+                }
+                if root.current-tab == "about" : AboutView {}
+            }
+        }
+        
+        PlayerBar {
+            height: 94px;
+            is-playing: root.is-playing;
+            progress: root.progress;
+            current-time: root.current-time;
+            total-time: root.total-time;
+            volume: root.volume;
+            is-muted: root.is-muted;
+            track-title: root.current-track-title;
+            track-artist: root.current-track-artist;
+            
+            play-pause => { root.play-pause() }
+            stop => { root.stop() }
+            next-track => { root.next-track() }
+            prev-track => { root.prev-track() }
+            seek(val) => { root.seek(val) }
+            set-volume(val) => { root.set-volume(val) }
+            toggle-mute => { root.toggle-mute() }
+        }
+    }
+}

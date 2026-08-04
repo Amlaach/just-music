@@ -1,0 +1,56 @@
+import { Theme } from "../theme.slint";
+import { IconButton } from "icon-button.slint";
+
+export component VolumeSlider {
+    in property <float> volume: 1.0;
+    in property <bool> is-muted: false;
+    
+    callback volume-changed(float);
+    callback toggle-mute();
+
+    height: 32px;
+    width: 120px;
+
+    HorizontalLayout {
+        spacing: Theme.spacing-xs;
+        
+        IconButton {
+            icon: root.is-muted ? "🔇" : "🔊";
+            button-size: 24px;
+            clicked => { root.toggle-mute(); }
+        }
+
+        track := Rectangle {
+            vertical-stretch: 1;
+            height: 4px;
+            border-radius: 2px;
+            background: Theme.borders;
+            y: (parent.height - self.height) / 2;
+
+            Rectangle {
+                width: parent.width * (root.is-muted ? 0.0 : root.volume);
+                height: 100%;
+                border-radius: 2px;
+                background: Theme.accent;
+            }
+
+            if touch.has-hover : Rectangle {
+                width: 10px;
+                height: 10px;
+                border-radius: 5px;
+                background: Theme.text-primary;
+                x: parent.width * (root.is-muted ? 0.0 : root.volume) - 5px;
+                y: (parent.height - self.height) / 2;
+            }
+
+            touch := TouchArea {
+                width: 100%;
+                height: 10px;
+                y: -3px;
+                clicked => {
+                    root.volume-changed(self.mouse-x / self.width);
+                }
+            }
+        }
+    }
+}

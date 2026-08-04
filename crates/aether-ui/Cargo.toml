@@ -4,19 +4,22 @@ version.workspace = true
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
+build = "build.rs"
 
 [dependencies]
 aether-core.workspace = true
 aether-audio.workspace = true
-eframe.workspace = true
-egui.workspace = true
-egui_extras.workspace = true
+slint.workspace = true
 rfd.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 dirs-next = "2.0"
 tracing.workspace = true
+crossbeam-channel.workspace = true
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.52"
 windows-sys = { version = "0.59", features = ["Win32_UI_Shell"] }
+
+[build-dependencies]
+slint-build = "1.17"

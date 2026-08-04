@@ -1,0 +1,125 @@
+import { Theme } from "../theme.slint";
+
+export component TrackCard {
+    in property <string> title;
+    in property <string> artist;
+    in property <string> album;
+    in property <string> duration;
+    in property <bool> is-selected;
+    in property <bool> is-playing;
+
+    callback clicked();
+    callback double-clicked();
+
+    height: 56px;
+    width: 100%;
+
+    Rectangle {
+        background: root.is-selected ? Theme.cards : (touch.has-hover ? Theme.cards-hover : transparent);
+        border-radius: Theme.radius-sm;
+        animate background { duration: Theme.anim-fast; }
+
+        if root.is-playing && !Theme.is-rtl : Rectangle {
+            x: 0;
+            width: 4px;
+            height: 50%;
+            y: 25%;
+            border-radius: 2px;
+            background: Theme.accent;
+        }
+        
+        if root.is-playing && Theme.is-rtl : Rectangle {
+            x: parent.width - 4px;
+            width: 4px;
+            height: 50%;
+            y: 25%;
+            border-radius: 2px;
+            background: Theme.accent;
+        }
+
+        if !Theme.is-rtl : HorizontalLayout {
+            padding: Theme.spacing-sm;
+            spacing: Theme.spacing-md;
+            
+            VerticalLayout {
+                alignment: center;
+                Text {
+                    text: root.title;
+                    color: root.is-playing ? Theme.accent : Theme.text-primary;
+                    font-size: Theme.font-md;
+                    font-weight: 700;
+                    overflow: elide;
+                }
+                Text {
+                    text: root.artist;
+                    color: Theme.text-secondary;
+                    font-size: Theme.font-sm;
+                    overflow: elide;
+                }
+            }
+            
+            Rectangle { horizontal-stretch: 1; }
+            
+            Text {
+                text: root.album;
+                color: Theme.text-secondary;
+                font-size: Theme.font-sm;
+                vertical-alignment: center;
+            }
+            Text {
+                text: root.duration;
+                color: Theme.text-secondary;
+                font-size: Theme.font-sm;
+                vertical-alignment: center;
+                min-width: 40px;
+                horizontal-alignment: right;
+            }
+        }
+        
+        if Theme.is-rtl : HorizontalLayout {
+            padding: Theme.spacing-sm;
+            spacing: Theme.spacing-md;
+            
+            Text {
+                text: root.duration;
+                color: Theme.text-secondary;
+                font-size: Theme.font-sm;
+                vertical-alignment: center;
+                min-width: 40px;
+                horizontal-alignment: left;
+            }
+            Text {
+                text: root.album;
+                color: Theme.text-secondary;
+                font-size: Theme.font-sm;
+                vertical-alignment: center;
+            }
+            
+            Rectangle { horizontal-stretch: 1; }
+            
+            VerticalLayout {
+                alignment: center;
+                Text {
+                    text: root.title;
+                    color: root.is-playing ? Theme.accent : Theme.text-primary;
+                    font-size: Theme.font-md;
+                    font-weight: 700;
+                    overflow: elide;
+                    horizontal-alignment: right;
+                }
+                Text {
+                    text: root.artist;
+                    color: Theme.text-secondary;
+                    font-size: Theme.font-sm;
+                    overflow: elide;
+                    horizontal-alignment: right;
+                }
+            }
+        }
+    }
+
+    touch := TouchArea {
+        clicked => { root.clicked(); }
+        // Slint TouchArea currently does not have double-clicked natively without timers, so we'll just implement clicked.
+    }
+}

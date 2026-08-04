@@ -1,0 +1,91 @@
+import { Theme } from "../theme.slint";
+import { IconButton } from "icon-button.slint";
+
+export component Header {
+    callback minimize();
+    callback maximize();
+    callback close();
+    callback search(string);
+    
+    height: 42px;
+    width: 100%;
+    
+    TouchArea {
+        width: 100%;
+        height: 100%;
+        // Slint allows window dragging natively on Window, but we can capture clicks if needed
+    }
+
+    HorizontalLayout {
+        padding-left: Theme.spacing-md;
+        padding-right: Theme.spacing-md;
+        alignment: stretch;
+        
+        if !Theme.is-rtl : HorizontalLayout {
+            alignment: start;
+            spacing: Theme.spacing-xs;
+            Text { text: "Jost"; color: Theme.text-primary; font-weight: 700; font-size: Theme.font-md; vertical-alignment: center; }
+            Text { text: "Music"; color: Theme.text-primary; font-size: Theme.font-md; vertical-alignment: center; }
+            Text { text: "מוזיקה"; color: Theme.accent; font-size: Theme.font-md; vertical-alignment: center; }
+        }
+        
+        if Theme.is-rtl : HorizontalLayout {
+            alignment: start;
+            spacing: Theme.spacing-xs;
+            Text { text: "מוזיקה"; color: Theme.accent; font-size: Theme.font-md; vertical-alignment: center; }
+            Text { text: "Music"; color: Theme.text-primary; font-size: Theme.font-md; vertical-alignment: center; }
+            Text { text: "Jost"; color: Theme.text-primary; font-weight: 700; font-size: Theme.font-md; vertical-alignment: center; }
+        }
+
+        Rectangle {
+            horizontal-stretch: 1;
+        }
+
+        // Search Bar Placeholder
+        Rectangle {
+            width: 200px;
+            height: 28px;
+            background: Theme.cards;
+            border-radius: Theme.radius-sm;
+            border-width: 1px;
+            border-color: Theme.borders;
+            y: (parent.height - self.height) / 2;
+
+            Text {
+                text: Theme.language == "he" ? "🔍 חיפוש..." : "🔍 Search...";
+                color: Theme.text-secondary;
+                font-size: Theme.font-sm;
+                x: Theme.is-rtl ? parent.width - self.width - Theme.spacing-sm : Theme.spacing-sm;
+                y: (parent.height - self.height) / 2;
+            }
+        }
+
+        Rectangle {
+            horizontal-stretch: 1;
+        }
+
+        HorizontalLayout {
+            alignment: end;
+            spacing: Theme.spacing-xs;
+            
+            IconButton {
+                icon: "─";
+                button-size: 28px;
+                hover-color: Theme.cards-hover;
+                clicked => { root.minimize(); }
+            }
+            IconButton {
+                icon: "□";
+                button-size: 28px;
+                hover-color: Theme.cards-hover;
+                clicked => { root.maximize(); }
+            }
+            IconButton {
+                icon: "✕";
+                button-size: 28px;
+                hover-color: #e81123;
+                clicked => { root.close(); }
+            }
+        }
+    }
+}

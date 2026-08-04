@@ -1,0 +1,34 @@
+import { Theme } from "../theme.slint";
+
+export component IconButton {
+    in property <string> icon;
+    in property <length> button-size: 32px;
+    in property <color> icon-color: Theme.text-primary;
+    in property <color> bg-color: transparent;
+    in property <color> hover-color: Theme.cards-hover;
+
+    callback clicked();
+
+    width: root.button-size;
+    height: root.button-size;
+
+    Rectangle {
+        width: 100%;
+        height: 100%;
+        border-radius: Theme.radius-md;
+        background: touch.pressed ? Theme.borders : (touch.has-hover ? root.hover-color : root.bg-color);
+        animate background { duration: Theme.anim-fast; }
+
+        Text {
+            text: root.icon;
+            color: root.icon-color;
+            font-size: root.button-size * 0.5;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+    }
+
+    touch := TouchArea {
+        clicked => { root.clicked(); }
+    }
+}

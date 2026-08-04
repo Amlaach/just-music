@@ -15,8 +15,7 @@ aether-audio.workspace = true
 aether-cache.workspace = true
 aether-monitor.workspace = true
 aether-ui.workspace = true
-eframe.workspace = true
-egui.workspace = true
+slint.workspace = true
 tokio = { version = "1.38", features = ["rt-multi-thread", "macros"] }
 tracing.workspace = true
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }

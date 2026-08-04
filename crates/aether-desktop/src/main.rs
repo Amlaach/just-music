@@ -1,9 +1,7 @@
 #![windows_subsystem = "windows"]
 
 use aether_audio::HeadlessAudioEngine;
-use aether_ui::JustMusicApp;
-use eframe::NativeOptions;
-use egui::ViewportBuilder;
+use aether_ui::JostMusicApp;
 use std::path::PathBuf;
 
 fn main() {
@@ -95,36 +93,16 @@ fn main() {
         }
     }
 
-    let viewport = ViewportBuilder::default()
-        .with_title("Just Music")
-        .with_decorations(false)
-        .with_inner_size([920.0, 620.0])
-        .with_min_inner_size([800.0, 520.0]);
-
-    let native_options = NativeOptions {
-        viewport,
-        ..Default::default()
-    };
-
     tracing::info!("Launching GUI...");
+    
+    let app = JostMusicApp::new(audio_handle);
+    if let Some(path) = initial_track {
+        app.load_file(path);
+    }
 
-    if let Err(e) = eframe::run_native(
-        "Just Music",
-        native_options,
-        Box::new(move |cc| {
-            let mut app = JustMusicApp::new(cc, audio_handle);
-            if let Some(path) = initial_track {
-                aether_ui::views::home_view::load_file(
-                    path,
-                    &mut app.state,
-                    app.audio_handle.as_ref(),
-                );
-            }
-            Ok(Box::new(app))
-        }),
-    ) {
-        tracing::error!("eframe::run_native failed: {}", e);
-        let error_msg = format!("Just Music failed to start: {}", e);
+    if let Err(e) = app.run() {
+        tracing::error!("Slint run failed: {:?}", e);
+        let error_msg = format!("Just Music failed to start: {:?}", e);
         let _ = std::fs::write(&panic_log, &error_msg);
     }
 }

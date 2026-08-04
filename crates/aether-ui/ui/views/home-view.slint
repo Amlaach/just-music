@@ -1,0 +1,158 @@
+import { Theme } from "../theme.slint";
+import { TrackCard } from "../components/track-card.slint";
+
+export struct Track {
+    title: string,
+    artist: string,
+    album: string,
+    duration: string,
+    is-selected: bool,
+    is-playing: bool,
+}
+
+export component HomeView {
+    in property <[Track]> tracks: [];
+    in property <int> track-count: 0;
+    
+    callback open-file();
+    callback scan-folder();
+    callback play-track(int);
+    callback select-track(int);
+    
+    VerticalLayout {
+        padding: 24px;
+        spacing: 16px;
+        
+        HorizontalLayout {
+            alignment: Theme.is-rtl ? end : start;
+            Text {
+                text: Theme.language == "he" ? "🎵 הספרייה שלי" : "🎵 My Library";
+                font-size: 24px;
+                color: Theme.text;
+                font-weight: 700;
+            }
+        }
+        
+        HorizontalLayout {
+            spacing: 12px;
+            alignment: Theme.is-rtl ? end : start;
+            
+            if !Theme.is-rtl: Rectangle {
+                background: Theme.primary;
+                border-radius: 6px;
+                width: 140px;
+                height: 40px;
+                
+                TouchArea {
+                    clicked => { root.open-file() }
+                }
+                
+                Text {
+                    text: "Open File";
+                    color: #ffffff;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                    font-size: 14px;
+                    font-weight: 600;
+                }
+            }
+            if !Theme.is-rtl: Rectangle {
+                background: Theme.surface;
+                border-width: 1px;
+                border-color: Theme.border;
+                border-radius: 6px;
+                width: 140px;
+                height: 40px;
+                
+                TouchArea {
+                    clicked => { root.scan-folder() }
+                }
+                
+                Text {
+                    text: "📂 Scan Folder";
+                    color: Theme.text;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                    font-size: 14px;
+                }
+            }
+            if Theme.is-rtl: Rectangle {
+                background: Theme.surface;
+                border-width: 1px;
+                border-color: Theme.border;
+                border-radius: 6px;
+                width: 140px;
+                height: 40px;
+                
+                TouchArea {
+                    clicked => { root.scan-folder() }
+                }
+                
+                Text {
+                    text: "📂 סרוק תיקייה";
+                    color: Theme.text;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                    font-size: 14px;
+                }
+            }
+            if Theme.is-rtl: Rectangle {
+                background: Theme.primary;
+                border-radius: 6px;
+                width: 140px;
+                height: 40px;
+                
+                TouchArea {
+                    clicked => { root.open-file() }
+                }
+                
+                Text {
+                    text: "פתח קובץ";
+                    color: #ffffff;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                    font-size: 14px;
+                    font-weight: 600;
+                }
+            }
+        }
+        
+        Text {
+            text: Theme.language == "he" ? root.track-count + " שירים" : root.track-count + " tracks";
+            color: Theme.text-muted;
+            font-size: 12px;
+            horizontal-alignment: Theme.is-rtl ? right : left;
+        }
+        
+        if root.tracks.length == 0 : Rectangle {
+            VerticalLayout {
+                alignment: center;
+                spacing: 16px;
+                Text {
+                    text: "🎵";
+                    font-size: 64px;
+                    horizontal-alignment: center;
+                }
+                Text {
+                    text: Theme.language == "he" ? "הספרייה ריקה" : "Library is empty";
+                    font-size: 20px;
+                    color: Theme.text-muted;
+                    horizontal-alignment: center;
+                }
+            }
+        }
+        
+        if root.tracks.length > 0 : ListView {
+            for track[index] in root.tracks: TrackCard {
+                title: track.title;
+                artist: track.artist;
+                album: track.album;
+                duration: track.duration;
+                is-selected: track.is-selected;
+                is-playing: track.is-playing;
+                clicked => { root.select-track(index) }
+                double-clicked => { root.play-track(index) }
+            }
+        }
+    }
+}
